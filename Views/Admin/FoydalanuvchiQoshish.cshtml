@@ -1,0 +1,91 @@
+@model talim_platforma.Models.Foydalanuvchi
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Yangi foydalanuvchi";
+}
+
+<div class="mb-3">
+    <h2 class="mb-1">Yangi foydalanuvchi</h2>
+    <p class="text-muted small mb-0">Admin, o‘qituvchi yoki talaba uchun login ma'lumotlarini kiriting</p>
+</div>
+
+@if (TempData["xabar"] != null)
+{
+    <div class="alert alert-success py-2 px-3 small">@TempData["xabar"]</div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger py-2 px-3 small">
+        <ul class="mb-0">
+            @foreach (var xato in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@xato.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-action="FoydalanuvchiQoshish" method="post" class="mt-3">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="Ism" class="form-label"></label>
+            <input asp-for="Ism" class="form-control" placeholder="Ism" />
+            <span asp-validation-for="Ism" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label asp-for="Familiya" class="form-label"></label>
+            <input asp-for="Familiya" class="form-control" placeholder="Familiya" />
+            <span asp-validation-for="Familiya" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label asp-for="OtasiningIsmi" class="form-label"></label>
+            <input asp-for="OtasiningIsmi" class="form-control" placeholder="Otasining ismi" />
+            <span asp-validation-for="OtasiningIsmi" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label asp-for="TelefonRaqam" class="form-label"></label>
+            <input asp-for="TelefonRaqam" class="form-control" placeholder="+998..." />
+            <span asp-validation-for="TelefonRaqam" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label asp-for="Login" class="form-label"></label>
+            <input asp-for="Login" class="form-control" placeholder="Login" />
+            <span asp-validation-for="Login" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label asp-for="Parol" class="form-label"></label>
+            <input asp-for="Parol" class="form-control" type="password" placeholder="Parol" />
+            <span asp-validation-for="Parol" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label asp-for="Rol" class="form-label"></label>
+            <select asp-for="Rol" class="form-select">
+                <option value="admin">Admin</option>
+                <option value="teacher">Teacher</option>
+                <option value="student">Student</option>
+                <option value="user" selected>User</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-3">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Saqlash
+        </button>
+        <a asp-action="Foydalanuvchilar" class="btn btn-outline-secondary">
+            Orqaga
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

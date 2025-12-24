@@ -1,0 +1,48 @@
+@model IEnumerable<talim_platforma.Models.Tolov>
+
+<div class="card-body">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+        <h4 class="mb-0">Oylik kirim</h4>
+        <form class="d-flex align-items-end gap-2 flex-wrap" data-report-form="oylik">
+            <div>
+                <label class="form-label small mb-1" for="oy-select">Oy</label>
+                <select id="oy-select" name="oy" class="form-select">
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <option value="@i" selected="@(i == ViewBag.Oy)">
+                            @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)
+                        </option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-outline-primary">Ko‘rish</button>
+        </form>
+        <a class="btn btn-sm btn-outline-danger" href="/Hisobot/YuklabOlish?turi=oylik&oy=@ViewBag.Oy">PDF yuklab olish</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Talaba</th>
+                    <th>Miqdori</th>
+                    <th>Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Talaba?.Ism</td>
+                        <td>@item.Miqdor.ToString("N0") so‘m</td>
+                        <td>@item.Sana.ToString("dd.MM.yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-end fw-semibold">
+        Jami: @ViewBag.Jami so‘m
+    </div>
+</div>

@@ -1,0 +1,112 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Talim Plus (Teacher)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .sidebar-link {
+            @* Bazaviy ko‘rinish Tailwind classlari orqali berilgan, bu yerda faqat active holatini boshqaramiz *@
+        }
+
+        .sidebar-link.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .course-card.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex min-h-screen">
+        <!-- Left Sidebar -->
+        <div class="w-64 bg-white border-r border-gray-200 fixed h-screen overflow-y-auto shadow-sm">
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-200">
+                <h1 class="text-lg font-bold text-gray-800">Talim Plus · Teacher</h1>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="p-4 space-y-1">
+                <a asp-controller="Oqituvchi" asp-action="Index" 
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    Dashboard
+                </a>
+                <a asp-controller="Oqituvchi" asp-action="Groups" 
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors @(ViewContext.RouteData.Values["action"]?.ToString() == "Groups" ? "active" : "")">
+                    Groups
+                </a>
+                <a asp-controller="Imtihon" asp-action="Index" 
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors @(ViewContext.RouteData.Values["controller"]?.ToString() == "Imtihon" ? "active" : "")">
+                    📝 Imtihonlar
+                </a>
+                <a asp-controller="Oqituvchi" asp-action="Profile" 
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors @(ViewContext.RouteData.Values["action"]?.ToString() == "Profile" ? "active" : "")">
+                    👤 Profile
+                </a>
+                <a asp-controller="Auth" asp-action="Logout" 
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors mt-4">
+                    Log out
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 ml-64">
+            <!-- Top Header -->
+            <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
+                <div>
+                    @if (!string.IsNullOrEmpty(ViewData["Title"] as string))
+                    {
+                        <h2 class="text-lg font-semibold text-gray-800">
+                            @ViewData["Title"]
+                        </h2>
+                    }
+                </div>
+                <div class="flex items-center space-x-4">
+                    @if (ViewBag.Oqituvchi != null)
+                    {
+                        var ismStr = ViewBag.Oqituvchi.Ism as string;
+                        var avatarChar = !string.IsNullOrEmpty(ismStr) ? ismStr[0].ToString().ToUpper() : "?";
+
+                        <div class="flex items-center gap-3">
+                            <div class="h-9 w-9 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold">
+                                @avatarChar
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-medium text-gray-800">
+                                    @ViewBag.Oqituvchi.Ism @ViewBag.Oqituvchi.Familiya
+                                </span>
+                                <span class="text-xs text-gray-500">
+                                    @ViewBag.Oqituvchi.OtasiningIsmi
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="p-6 space-y-4">
+                <div>
+                    @await Component.InvokeAsync("Ads", new { target = "teacher" })
+                </div>
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

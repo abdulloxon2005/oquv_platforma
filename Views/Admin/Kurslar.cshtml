@@ -1,0 +1,111 @@
+@model IEnumerable<talim_platforma.Models.Kurs>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Kurslar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">Kurslar</h2>
+        <p class="text-muted small mb-0">Markazdagi barcha kurslar ro‘yxati</p>
+    </div>
+    <a class="btn btn-primary" asp-action="KursQoshish">
+        <i class="fas fa-plus me-1"></i> Yangi kurs
+    </a>
+</div>
+
+<div class="table-responsive mt-3">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Nomi</th>
+                <th>Darajasi</th>
+                <th>Narxi</th>
+                <th>Yaratilgan</th>
+                <th class="text-end">Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                var index = 1;
+                foreach (var kurs in Model)
+                {
+                    <tr>
+                        <td>@index</td>
+                        <td class="fw-semibold">@kurs.Nomi</td>
+                        <td>@kurs.Darajasi</td>
+                        <td>@kurs.Narxi.ToString("N0") so‘m</td>
+                        <td>@kurs.YaratilganVaqt.ToString("dd.MM.yyyy")</td>
+                        <td class="text-end text-nowrap">
+                        <a asp-action="KursTahrirlash" asp-route-id="@kurs.Id" class="btn btn-sm btn-outline-secondary me-1">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger delete-course-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteCourseModal"
+                                data-course-id="@kurs.Id"
+                                data-course-name="@kurs.Nomi">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        </td>
+                    </tr>
+                    index++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        Hozircha kurslar mavjud emas.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Kursni o'chirish modal oynasi -->
+<div class="modal fade" id="deleteCourseModal" tabindex="-1" aria-labelledby="deleteCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteCourseModalLabel">Kursni o‘chirish</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Yopish"></button>
+            </div>
+            <div class="modal-body">
+                <p>Quyidagi kursni o‘chirmoqchimisiz?</p>
+                <p class="fw-semibold" id="deleteCourseName"></p>
+                <div class="alert alert-warning small mb-0">
+                    Bu amal qaytarilmaydi.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteCourseForm" method="post" action="@Url.Action("KursOchirish", "Admin")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteCourseId" />
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-danger">Ha, o‘chirish</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("deleteCourseModal");
+            modal.addEventListener("show.bs.modal", function (event) {
+                const button = event.relatedTarget;
+                const courseId = button.getAttribute("data-course-id");
+                const courseName = button.getAttribute("data-course-name");
+                document.getElementById("deleteCourseId").value = courseId;
+                document.getElementById("deleteCourseName").textContent = courseName;
+            });
+        });
+    </script>
+}

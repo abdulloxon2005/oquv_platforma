@@ -1,0 +1,131 @@
+@model talim_platforma.Models.ImtihonNatija
+@{
+    Layout = "~/Views/Shared/_TalabaLayout.cshtml";
+    ViewData["Title"] = "Imtihon natijasi";
+    var javoblar = ViewBag.Javoblar as List<object> ?? new List<object>();
+}
+
+<div class="max-w-5xl mx-auto space-y-4">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div class="px-5 py-4 rounded-t-lg @(Model.Otdimi ? "bg-green-500" : "bg-red-500") text-white">
+            <h4 class="font-semibold">
+                @if (Model.Otdimi)
+                {
+                    <span>✅ Imtihondan o'tdingiz!</span>
+                }
+                else
+                {
+                    <span>❌ Imtihondan o'tmadingiz</span>
+                }
+            </h4>
+        </div>
+        <div class="px-5 py-5 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm">
+                <div class="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3">
+                    <div class="text-lg font-semibold text-gray-900">
+                        @Model.UmumiyBall / @Model.MaksimalBall
+                    </div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Ball</div>
+                </div>
+                <div class="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3">
+                    <div class="text-lg font-semibold text-gray-900">
+                        @Model.FoizNatija.ToString("F2")%
+                    </div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Foiz</div>
+                </div>
+                <div class="rounded-lg bg-gray-50 border border-gray-200 px-4 py-3">
+                    <div class="text-lg font-semibold text-gray-900">
+                        @Model.Imtihon.MinimalBall%
+                    </div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Minimal ball</div>
+                </div>
+            </div>
+
+            <div class="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-sm text-blue-800">
+                <div><span class="font-semibold">Imtihon:</span> @Model.Imtihon.Nomi</div>
+                <div><span class="font-semibold">Sana:</span> @Model.Sana.ToString("dd.MM.yyyy HH:mm")</div>
+            </div>
+
+            @if (javoblar.Any())
+            {
+                <div class="space-y-2">
+                    <h5 class="text-sm font-semibold text-gray-800">Javoblar</h5>
+                    <div class="border border-gray-200 rounded-lg overflow-x-auto bg-white">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">#</th>
+                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">Savol</th>
+                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">Sizning javobingiz</th>
+                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">To'g'ri javob</th>
+                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">Holat</th>
+                                    <th class="px-3 py-2 text-left font-semibold text-gray-700">Ball</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @{
+                                    int index = 1;
+                                }
+                                @foreach (var javob in javoblar)
+                                {
+                                    var javobDict = javob as System.Text.Json.JsonElement?;
+                                    if (javobDict.HasValue)
+                                    {
+                                        var j = javobDict.Value;
+                                        var togri = j.GetProperty("Togri").GetBoolean();
+                                        var tanlangan = j.GetProperty("TanlanganJavob").GetString();
+                                        var togriJavob = j.GetProperty("TogriJavob").GetString();
+                                        var ball = j.GetProperty("Ball").GetInt32();
+
+                                        <tr class="@(togri ? "bg-green-50" : "bg-red-50")">
+                                            <td class="px-3 py-2 text-gray-700">@index</td>
+                                            <td class="px-3 py-2 text-gray-800">Savol @index</td>
+                                            <td class="px-3 py-2"><strong>@tanlangan</strong></td>
+                                            <td class="px-3 py-2"><strong>@togriJavob</strong></td>
+                                            <td class="px-3 py-2">
+                                                @if (togri)
+                                                {
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-medium">
+                                                        ✅ To'g'ri
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-medium">
+                                                        ❌ Noto'g'ri
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="px-3 py-2 text-gray-700">@ball</td>
+                                        </tr>
+                                        index++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Otdimi && Model.Imtihon.SertifikatBeriladimi)
+            {
+                <div class="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+                    <h5 class="font-semibold mb-1">🎓 Sertifikat</h5>
+                    <p>Siz imtihondan muvaffaqiyatli o'tdingiz va sertifikat olish huquqiga egasiz!</p>
+                    <a href="/Imtihon/Sertifikatlar"
+                       class="inline-flex items-center mt-1 px-4 py-2 rounded-lg bg-green-500 text-white text-xs font-medium hover:bg-green-600 transition-colors">
+                        Sertifikatlarimni ko'rish
+                    </a>
+                </div>
+            }
+
+            <div class="pt-2">
+                <a href="/"
+                   class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+                    ← Bosh sahifaga
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

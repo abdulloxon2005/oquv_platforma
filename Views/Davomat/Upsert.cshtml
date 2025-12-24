@@ -1,0 +1,90 @@
+@model talim_platforma.Models.ViewModels.DavomatCreateViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    var title = Model?.Id.HasValue == true ? "Davomatni tahrirlash" : "Davomat qo‘shish";
+    ViewData["Title"] = title;
+    var guruhlar = ViewBag.Guruhlar as SelectList;
+    var talabalar = ViewBag.Talabalar as SelectList;
+    var darslar = ViewBag.Darslar as SelectList;
+    var statuses = new[] { "Keldi", "Kelmadi", "Kech keldi", "Uzrli" };
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>@title</h2>
+        <a asp-action="Index" asp-route-guruhId="@Model?.GuruhId" class="btn btn-outline-secondary">⬅️ Ortga</a>
+    </div>
+
+    <form asp-action="@(Model?.Id.HasValue == true ? "Edit" : "Create")" method="post" class="card shadow-sm p-4">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="GuruhId" class="form-label"></label>
+                <select asp-for="GuruhId" class="form-select" asp-items="guruhlar" onchange="onGroupChanged(this.value)">
+                    <option value="">Guruh tanlang</option>
+                </select>
+                <span asp-validation-for="GuruhId" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="TalabaId" class="form-label"></label>
+                <select asp-for="TalabaId" class="form-select" asp-items="talabalar">
+                    <option value="">Talaba tanlang</option>
+                </select>
+                <span asp-validation-for="TalabaId" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="DarsId" class="form-label"></label>
+                <select asp-for="DarsId" class="form-select" asp-items="darslar">
+                    <option value="">Dars tanlang</option>
+                </select>
+                <span asp-validation-for="DarsId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-md-4">
+                <label asp-for="Sana" class="form-label"></label>
+                <input asp-for="Sana" class="form-control" type="date" />
+                <span asp-validation-for="Sana" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Holati" class="form-label"></label>
+                <select asp-for="Holati" class="form-select">
+                    @foreach (var status in statuses)
+                    {
+                        <option value="@status" selected="@(Model?.Holati == status)">
+                            @status
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="Holati" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Izoh" class="form-label"></label>
+                <input asp-for="Izoh" class="form-control" />
+                <span asp-validation-for="Izoh" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4 text-end">
+            <button type="submit" class="btn btn-success">Saqlash</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function onGroupChanged(groupId) {
+            if (!groupId) return;
+            const params = new URLSearchParams(window.location.search);
+            params.set('guruhId', groupId);
+            window.location.href = `${window.location.pathname}?${params.toString()}`;
+        }
+    </script>
+}
+
+
+

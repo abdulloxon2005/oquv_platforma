@@ -1,0 +1,104 @@
+@model talim_platforma.Models.ViewModels.StudentProfileUpdateViewModel
+@{
+    Layout = "~/Views/Shared/_TalabaLayout.cshtml";
+    ViewData["Title"] = "Profil";
+}
+
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex items-center gap-4">
+        <div class="h-14 w-14 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-semibold">
+            @(!string.IsNullOrWhiteSpace(Model.User.Ism) ? Model.User.Ism.Trim()[0].ToString().ToUpper() : "T")
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">@($"{Model.User.Ism} {Model.User.Familiya}".Trim())</h1>
+            <p class="text-sm text-gray-500">@Model.User.Login</p>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-gray-800">Shaxsiy ma'lumotlar</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div>
+                <dt class="text-gray-500">Ism</dt>
+                <dd class="font-medium">@Model.User.Ism</dd>
+            </div>
+            <div>
+                <dt class="text-gray-500">Familiya</dt>
+                <dd class="font-medium">@Model.User.Familiya</dd>
+            </div>
+            <div>
+                <dt class="text-gray-500">Otasining ismi</dt>
+                <dd class="font-medium">@(!string.IsNullOrWhiteSpace(Model.User.OtasiningIsmi) ? Model.User.OtasiningIsmi : "-")</dd>
+            </div>
+            <div>
+                <dt class="text-gray-500">Telefon</dt>
+                <dd class="font-medium">@Model.User.TelefonRaqam</dd>
+            </div>
+            <div>
+                <dt class="text-gray-500">Login</dt>
+                <dd class="font-medium">@Model.User.Login</dd>
+            </div>
+            <div>
+                <dt class="text-gray-500">Holati</dt>
+                <dd class="font-medium">@((Model.User.Faolmi ? "Faol" : "Nofaol"))</dd>
+            </div>
+        </dl>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-gray-800">Ma'lumotlarni yangilash</h2>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="rounded-xl border border-green-200 bg-green-50 text-green-800 px-4 py-3 text-sm">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-sm">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <form asp-action="Profil" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-sm text-red-700 space-y-1 rounded-lg border border-red-200 bg-red-50 px-4 py-3"></div>
+            <div>
+                <label asp-for="TelefonRaqam" class="block text-sm font-medium text-gray-700"></label>
+                <input asp-for="TelefonRaqam" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <span asp-validation-for="TelefonRaqam" class="text-sm text-red-600"></span>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="OldPassword" class="block text-sm font-medium text-gray-700"></label>
+                    <input asp-for="OldPassword" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="current-password" />
+                    <span class="text-xs text-gray-500">Yangi parol qo'yish uchun avvalgi parolni kiriting.</span>
+                    <span asp-validation-for="OldPassword" class="text-sm text-red-600"></span>
+                </div>
+                <div>
+                    <label asp-for="NewPassword" class="block text-sm font-medium text-gray-700"></label>
+                    <input asp-for="NewPassword" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="new-password" />
+                    <span class="text-xs text-gray-500">Ixtiyoriy. Kamida 6 ta belgi.</span>
+                    <span asp-validation-for="NewPassword" class="text-sm text-red-600"></span>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div></div>
+                <div>
+                    <label asp-for="ConfirmPassword" class="block text-sm font-medium text-gray-700"></label>
+                    <input asp-for="ConfirmPassword" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-sm text-red-600"></span>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
+                    Saqlash
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+

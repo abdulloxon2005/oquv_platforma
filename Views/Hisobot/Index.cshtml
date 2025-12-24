@@ -1,0 +1,94 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Hisobotlar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">📊 Hisobotlar markazi</h2>
+        <p class="text-muted small mb-0">Bugungi, oylik va yillik kirimlar hamda qarzdor talabalar</p>
+    </div>
+    <div class="text-muted small">
+        Talim Plus • Finance overview
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <button class="w-100 btn btn-outline-primary py-3 report-trigger" data-url="/Hisobot/BugungiKirim">
+            Bugungi kirim
+        </button>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <button class="w-100 btn btn-outline-success py-3 report-trigger" data-url="/Hisobot/OylikKirim">
+            Oylik kirim
+        </button>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <button class="w-100 btn btn-outline-warning py-3 report-trigger" data-url="/Hisobot/YillikKirim">
+            Yillik kirim
+        </button>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3">
+        <button class="w-100 btn btn-outline-danger py-3 report-trigger" data-url="/Hisobot/QarzdorTalabalar">
+            Qarzdor talabalar
+        </button>
+    </div>
+</div>
+
+<div id="hisobotContent" class="card shadow-sm">
+    <div class="card-body text-center text-muted py-5">
+        Hisobotni ko‘rish uchun yuqoridagi tugmalardan birini bosing.
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const buttons = document.querySelectorAll(".report-trigger");
+            const container = document.getElementById("hisobotContent");
+
+            const loadingTemplate = `
+                <div class="card-body text-center text-muted py-5">
+                    Ma'lumotlar yuklanmoqda...
+                </div>`;
+
+            function loadReport(url) {
+                container.innerHTML = loadingTemplate;
+                fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                    .then(res => res.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                        wireDynamicForms();
+                    })
+                    .catch(() => {
+                        container.innerHTML = `<div class="card-body text-center text-danger py-5">
+                            Xatolik yuz berdi. Iltimos, qayta urinib ko‘ring.
+                        </div>`;
+                    });
+            }
+
+            function wireDynamicForms() {
+                container.querySelectorAll("form[data-report-form]").forEach(form => {
+                    form.addEventListener("submit", function (e) {
+                        e.preventDefault();
+                        const formData = new FormData(form);
+                        const params = new URLSearchParams(formData);
+                        const type = form.getAttribute("data-report-form");
+                        let endpoint = "/Hisobot/BugungiKirim";
+                        if (type === "oylik") endpoint = "/Hisobot/OylikKirim";
+                        if (type === "yillik") endpoint = "/Hisobot/YillikKirim";
+                        loadReport(`${endpoint}?${params.toString()}`);
+                    });
+                });
+            }
+
+            buttons.forEach(btn => {
+                btn.addEventListener("click", () => loadReport(btn.dataset.url));
+            });
+
+            // Default report
+            loadReport("/Hisobot/BugungiKirim");
+        })();
+    </script>
+}

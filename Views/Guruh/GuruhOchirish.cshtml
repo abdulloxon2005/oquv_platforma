@@ -1,0 +1,52 @@
+@model talim_platforma.Models.Guruh
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Guruhni o‘chirish";
+}
+
+<div class="card shadow-sm border-danger">
+    <div class="card-header bg-danger text-white text-center">
+        <h4>⚠️ Guruhni o‘chirishni tasdiqlang</h4>
+    </div>
+
+    <div class="card-body">
+        <h5 class="text-center text-danger mb-4">
+            Siz haqiqatdan ham ushbu guruhni o‘chirmoqchimisiz?
+        </h5>
+
+        <dl class="row">
+            <dt class="col-sm-3">Guruh nomi:</dt>
+            <dd class="col-sm-9">@Model.Nomi</dd>
+
+            <dt class="col-sm-3">Boshlanish sanasi:</dt>
+            <dd class="col-sm-9">@Model.BoshlanishSanasi.ToShortDateString()</dd>
+
+            <dt class="col-sm-3">Dars kunlari:</dt>
+            <dd class="col-sm-9">@Model.DarsKunlari</dd>
+
+            <dt class="col-sm-3">Dars vaqti:</dt>
+            <dd class="col-sm-9">@Model.DarsVaqti</dd>
+
+            <dt class="col-sm-3">Xona:</dt>
+            <dd class="col-sm-9">@Model.Xona</dd>
+
+            <dt class="col-sm-3">Holati:</dt>
+            <dd class="col-sm-9">@Model.Holati</dd>
+        </dl>
+
+        <form asp-action="GuruhOchirish" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-danger px-4">
+                    🗑 Ha, o‘chirilsin
+                </button>
+                <a asp-action="Guruhlar" class="btn btn-outline-secondary px-4 ms-2">
+                    ❌ Yo‘q, bekor qilish
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

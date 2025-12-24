@@ -1,0 +1,25 @@
+@model talim_platforma.Models.Tolov
+
+<div>
+    <p><b>F.I.Sh:</b> @Model.Talaba.Familiya @Model.Talaba.Ism</p>
+    <p><b>Kurs:</b> @Model.Kurs.Nomi</p>
+    <p><b>Miqdor:</b> @Model.Miqdor.ToString("N0") so‘m</p>
+    <p><b>Usuli:</b> @Model.TolovUsuli</p>
+    <p><b>Sana:</b> @Model.Sana.ToString("dd.MM.yyyy HH:mm")</p>
+    
+    <p>
+        <b>Holat:</b>
+        @if (Model.Qarzdorlik > 0)
+        {
+            <span class="badge bg-danger">Qarzdor (@Model.Qarzdorlik.ToString("N0") so‘m)</span>
+        }
+        else if (Model.Haqdorlik > 0)
+        {
+            <span class="badge bg-warning text-dark">Haqdor (@Model.Haqdorlik.ToString("N0") so‘m)</span>
+        }
+        else
+        {
+            <span class="badge bg-success">To‘liq to‘langan</span>
+        }
+    </p>
+</div>

@@ -1,0 +1,77 @@
+@model IEnumerable<talim_platforma.Models.Davomat>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Davomat";
+    var guruhlar = ViewBag.Guruhlar as SelectList;
+    var selectedGroup = Context.Request.Query["guruhId"].ToString();
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Davomat nazorati</h2>
+        <a asp-action="Create" asp-route-guruhId="@selectedGroup" class="btn btn-primary">➕ Davomat qo‘shish</a>
+    </div>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <select name="guruhId" class="form-select" onchange="this.form.submit()">
+                <option value="">Barcha guruhlar</option>
+                @if (guruhlar != null)
+                {
+                    foreach (var item in guruhlar)
+                    {
+                        <option value="@item.Value" selected="@(item.Selected)">
+                            @item.Text
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+    </form>
+
+    <div class="table-responsive shadow-sm">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Sana</th>
+                    <th>Guruh</th>
+                    <th>Talaba</th>
+                    <th>Dars</th>
+                    <th>Holati</th>
+                    <th>Izoh</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Hozircha ma'lumot yo‘q.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Sana.ToString("dd.MM.yyyy")</td>
+                            <td>@item.Guruh?.Nomi</td>
+                            <td>@item.Talaba?.Ism @item.Talaba?.Familiya</td>
+                            <td>@item.Dars?.Mavzu</td>
+                            <td>@item.Holati</td>
+                            <td>@item.Izoh</td>
+                            <td class="text-end">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">✏️</a>
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('O‘chirishni tasdiqlaysizmi?')">🗑️</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

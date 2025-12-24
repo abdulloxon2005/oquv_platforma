@@ -1,0 +1,51 @@
+@model IEnumerable<talim_platforma.Models.Foydalanuvchi>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Bot ulash";
+}
+
+<div class="mb-3">
+    <h2 class="mb-1">O‘quvchini Telegram botga ulash</h2>
+    <p class="text-muted small mb-0">Talabalarni qidirib, Telegram chat ID bilan bog‘lang</p>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="search" value="@Context.Request.Query["search"]" placeholder="Ism yoki familiya bo‘yicha qidirish" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Qidirish</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Ism</th>
+                <th>Familiya</th>
+                <th>Otasining ismi</th>
+                <th>Telefon</th>
+                <th>Chat ID</th>
+                <th class="text-end">Amal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var talaba in Model)
+            {
+                <tr>
+                    <td>@talaba.Ism</td>
+                    <td>@talaba.Familiya</td>
+                    <td>@talaba.OtasiningIsmi</td>
+                    <td>@talaba.TelefonRaqam</td>
+                    <td>@(string.IsNullOrEmpty(talaba.ChatId) ? "-" : talaba.ChatId)</td>
+                    <td class="text-end">
+                        <a asp-action="ChatIdKirit" asp-route-id="@talaba.Id" class="btn btn-sm btn-outline-success">
+                            Chat ID kiritish
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

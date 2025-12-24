@@ -1,0 +1,142 @@
+@model IEnumerable<talim_platforma.Models.ImtihonNatija>
+@using talim_platforma.Models
+@using talim_platforma.Helpers
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Imtihon natijalari";
+    var guruhlar = ViewBag.Guruhlar as List<Guruh> ?? new();
+    var imtihonlar = ViewBag.Imtihonlar as List<Imtihon> ?? new();
+    int? guruhId = ViewBag.GuruhId as int?;
+    int? imtihonId = ViewBag.ImtihonId as int?;
+    var manualStats = ViewBag.NatijaManualStats as Dictionary<int, ManualResultHelper.ManualResultSummary> ?? new();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">📊 Imtihon natijalari</h2>
+        <p class="text-muted small mb-0">Imtihonlar bo‘yicha barcha guruhlarning natijalari</p>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Guruh</label>
+                <select name="guruhId" class="form-select">
+                    <option value="">Barcha guruhlar</option>
+                    @foreach (var g in guruhlar)
+                    {
+                        if (guruhId.HasValue && guruhId.Value == g.Id)
+                        {
+                            <option value="@g.Id" selected="selected">
+                                @g.Nomi (@g.Kurs?.Nomi)
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@g.Id">
+                                @g.Nomi (@g.Kurs?.Nomi)
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Imtihon</label>
+                <select name="imtihonId" class="form-select">
+                    <option value="">Barcha imtihonlar</option>
+                    @foreach (var i in imtihonlar)
+                    {
+                        if (imtihonId.HasValue && imtihonId.Value == i.Id)
+                        {
+                            <option value="@i.Id" selected="selected">
+                                @i.Nomi (@i.Guruh?.Nomi) - @i.Sana.ToString("dd.MM.yyyy")
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@i.Id">
+                                @i.Nomi (@i.Guruh?.Nomi) - @i.Sana.ToString("dd.MM.yyyy")
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">🔍 Filtrlash</button>
+                <a asp-action="ImtihonNatijalari" class="btn btn-outline-secondary">🔄 Tozalash</a>
+            </div>
+        </form>
+    </div>
+    </div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Hozircha natijalar topilmadi.</div>
+}
+else
+{
+    <div class="table-responsive shadow-sm">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Imtihon</th>
+                    <th>Guruh</th>
+                    <th>Talaba</th>
+                    <th>Ball</th>
+                    <th>Foiz</th>
+                    <th>To'g'ri javob</th>
+                    <th>Holat</th>
+                    <th>Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var n in Model)
+                {
+                    <tr>
+                        <td>@n.Id</td>
+                        <td>@n.Imtihon?.Nomi</td>
+                        <td>@n.Imtihon?.Guruh?.Nomi</td>
+                        <td>@n.Talaba?.Familiya @n.Talaba?.Ism</td>
+                        <td>@n.UmumiyBall / @n.MaksimalBall</td>
+                        <td>@n.FoizNatija.ToString("F2")%</td>
+                        <td>
+                            @{
+                                manualStats.TryGetValue(n.Id, out ManualResultHelper.ManualResultSummary? summary);
+                                var correctCount = summary?.CorrectAnswers;
+                                var totalCount = summary?.TotalQuestions ?? n.Imtihon?.Savollar?.Count;
+                            }
+                            @if (correctCount.HasValue && totalCount.GetValueOrDefault() > 0)
+                            {
+                                <span>@correctCount / @totalCount</span>
+                            }
+                            else if (correctCount.HasValue)
+                            {
+                                <span>@correctCount</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td>
+                            @if (n.Otdimi)
+                            {
+                                <span class="badge bg-success">✅ O'tdi</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">❌ O'tmadi</span>
+                            }
+                        </td>
+                        <td>@n.Sana.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+

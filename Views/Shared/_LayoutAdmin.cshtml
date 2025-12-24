@@ -1,0 +1,59 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"] - Admin Paneli</title>
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+        /* Sidebar yopilganda kichraytirish */
+        .sidebar-closed {
+            width: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="flex min-h-screen">
+        <!-- 🟦 Sidebar -->
+        @Html.Partial("_AdminSidebar")
+
+        <!-- 🟩 Kontent -->
+        <div class="flex-1 ml-64 p-6 transition-all duration-300" id="mainContent">
+            <header class="mb-4 pb-2 border-b border-gray-300 flex justify-between items-center">
+                <h1 class="text-xl font-semibold">@ViewData["Title"]</h1>
+                <button id="sidebarOpen" class="bg-gray-800 text-white px-3 py-1 rounded hidden">☰</button>
+            </header>
+
+            @RenderBody()
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById("adminSidebar");
+        const mainContent = document.getElementById("mainContent");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebarOpen = document.getElementById("sidebarOpen");
+
+        sidebarToggle.addEventListener("click", () => {
+            sidebar.classList.add("sidebar-closed");
+            mainContent.classList.remove("ml-64");
+            sidebarOpen.classList.remove("hidden");
+        });
+
+        sidebarOpen.addEventListener("click", () => {
+            sidebar.classList.remove("sidebar-closed");
+            mainContent.classList.add("ml-64");
+            sidebarOpen.classList.add("hidden");
+        });
+    </script>
+
+</body>
+</html>

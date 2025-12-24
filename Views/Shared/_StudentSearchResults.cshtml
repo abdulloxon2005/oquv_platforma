@@ -1,0 +1,18 @@
+@model IEnumerable<talim_platforma.Models.Foydalanuvchi>
+
+@if(!Model.Any())
+{
+    <p>Talaba topilmadi.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach(var talaba in Model)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                @talaba.Ism @talaba.Familiya (@talaba.Login)
+                <button class="btn btn-sm btn-success" onclick="addStudent(@talaba.Id)">➕ Qo‘shish</button>
+            </li>
+        }
+    </ul>
+}

@@ -1,0 +1,118 @@
+@model talim_platforma.Models.Tolov
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Yangi to'lov";
+}
+
+<h3 class="mb-3">🧾 Yangi to'lov qo'shish</h3>
+
+@if (TempData["ErrorMessage"] != null) {
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@if (TempData["SuccessMessage"] != null) {
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<form method="post" asp-action="Qoshish" id="tolovForm" class="border rounded-3 bg-white shadow-sm p-4">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="talabaId" id="talabaId" />
+        <div class="mb-3">
+            <label for="qidir" class="form-label">Talabani qidirish (ism yoki telefon)</label>
+            <input id="qidir" class="form-control" placeholder="Ism yoki telefon kiriting...">
+            <div id="qidirNatija" class="list-group mt-1" style="max-height:200px; overflow:auto"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Talabaning kurslari</label>
+            <select id="kurslar" name="kursId" class="form-control">
+                <option value="">Avval talaba tanlang</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">To‘lanishi kerak (kurs narxi — faqat bildirish)</label>
+            <input id="kursNarxi" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">To‘lov summasi (miqdor)</label>
+            <input name="miqdor" class="form-control" type="number" step="0.01" min="0.01" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">To‘lov usuli</label>
+            <select name="tolovUsuli" class="form-control" required>
+                <option>Naqd</option>
+                <option>Click</option>
+                <option>Payme</option>
+                <option>Humo</option>
+                <option>Karta</option>
+            </select>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <a asp-action="Index" class="btn btn-outline-secondary">Bekor qilish</a>
+            <button type="submit" class="btn btn-primary">💰 To'lov qilish</button>
+        </div>
+    </form>
+
+@section Scripts {
+<script>
+const qidir = document.getElementById('qidir');
+const natija = document.getElementById('qidirNatija');
+const talabaIdInput = document.getElementById('talabaId');
+const kursSelect = document.getElementById('kurslar');
+const kursNarxiInput = document.getElementById('kursNarxi');
+
+let timer = null;
+qidir.addEventListener('input', (e) => {
+    const v = e.target.value.trim();
+    natija.innerHTML = '';
+    talabaIdInput.value = '';
+    kursSelect.innerHTML = '<option value="">Avval talaba tanlang</option>';
+    kursNarxiInput.value = '';
+    if (timer) clearTimeout(timer);
+    if (v.length < 2) return;
+    timer = setTimeout(async () => {
+        const res = await fetch(`/Tolov/QidirTalaba?q=${encodeURIComponent(v)}`);
+        const data = await res.json();
+        natija.innerHTML = '';
+        data.forEach(t => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'list-group-item list-group-item-action';
+            btn.textContent = t.text;
+            btn.addEventListener('click', async () => {
+                qidir.value = t.text;
+                talabaIdInput.value = t.id;
+                natija.innerHTML = '';
+                // kurslarni olish
+                const res2 = await fetch(`/Tolov/GetKurslarByTalaba?id=${t.id}`);
+                const kurslar = await res2.json();
+                kursSelect.innerHTML = '';
+                if (kurslar.length === 0) {
+                    kursSelect.innerHTML = '<option value="">Talaba hech qanday kursda yo\'q</option>';
+                } else {
+                    kurslar.forEach(k => {
+                        const opt = document.createElement('option');
+                        opt.value = k.id;
+                        opt.textContent = k.nomi;
+                        opt.dataset.narx = k.narx;
+                        kursSelect.appendChild(opt);
+                    });
+                    // avtomatik kurs narxini ko'rsatish
+                    kursNarxiInput.value = kursSelect.options[kursSelect.selectedIndex].dataset.narx + " so'm";
+                }
+            });
+            natija.appendChild(btn);
+        });
+    }, 300);
+});
+
+kursSelect.addEventListener('change', () => {
+    const opt = kursSelect.options[kursSelect.selectedIndex];
+    if (!opt) { kursNarxiInput.value = ''; return; }
+    kursNarxiInput.value = (opt.dataset.narx || '') + " so'm";
+});
+</script>
+}

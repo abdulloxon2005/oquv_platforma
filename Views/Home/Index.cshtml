@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "Talim Plus";
+}
+
+<div class="mb-10">
+    @await Component.InvokeAsync("Ads", new { target = "home" })
+</div>
+
+<!-- HERO SECTION -->
+<div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl p-10 md:p-16 mt-5 flex flex-col md:flex-row items-center justify-between">
+    <div class="md:w-1/2">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+            Kelajak bu yerda boshlanadi!
+        </h1>
+        <p class="text-lg mb-6">
+            Zamonaviy IT va til kurslari bilan o‘z bilimingizni rivojlantiring.
+        </p>
+
+        <a href="/Courses" class="inline-block bg-white text-blue-700 px-6 py-3 rounded-full font-semibold hover:bg-gray-200">
+            Kurslarga yozilish
+        </a>
+    </div>
+
+    <img src="/images/education.png" alt="education banner" class="md:w-1/2 mt-6 md:mt-0">
+</div>
+
+
+<!-- WHY US SECTION -->
+<div class="mt-20">
+    <h2 class="text-3xl font-bold text-center mb-10">Nega aynan biz?</h2>
+
+    <div class="grid md:grid-cols-3 gap-8">
+        <div class="p-6 bg-white shadow-md rounded-xl text-center">
+            <h3 class="text-xl font-semibold mb-3">🎓 Professional ustozlar</h3>
+            <p class="text-gray-600">Ko‘p yillik tajribaga ega malakali o‘qituvchilar.</p>
+        </div>
+        
+        <div class="p-6 bg-white shadow-md rounded-xl text-center">
+            <h3 class="text-xl font-semibold mb-3">🕒 Moslashuvchan darslar</h3>
+            <p class="text-gray-600">Online va offline darslar jadvali sizga mos tarzda.</p>
+        </div>
+
+        <div class="p-6 bg-white shadow-md rounded-xl text-center">
+            <h3 class="text-xl font-semibold mb-3">📚 Zamonaviy metodika</h3>
+            <p class="text-gray-600">Amaliy darslar, real loyihalar va interaktiv mashg‘ulotlar.</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- STATISTICS SECTION -->
+<div class="mt-20 bg-blue-50 py-12 rounded-xl">
+    <div class="grid md:grid-cols-3 text-center gap-10">
+        <div>
+            <h3 class="text-4xl font-bold text-blue-700">1500+</h3>
+            <p class="text-gray-700 mt-2">Bitiruvchilar</p>
+        </div>
+        <div>
+            <h3 class="text-4xl font-bold text-blue-700">20+</h3>
+            <p class="text-gray-700 mt-2">Kurslar</p>
+        </div>
+        <div>
+            <h3 class="text-4xl font-bold text-blue-700">5 yil</h3>
+            <p class="text-gray-700 mt-2">Tajriba</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- POPULAR COURSES SECTION -->
+<div class="mt-20">
+    <h2 class="text-3xl font-bold text-center mb-10">Mashhur kurslar</h2>
+
+    <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+            <img src="/images/course1.jpg" class="w-full h-48 object-cover">
+            <div class="p-5">
+                <h3 class="font-semibold text-xl mb-2">Frontend dasturlash</h3>
+                <p class="text-gray-600 mb-4">HTML, CSS, JavaScript, React bo‘yicha amaliy kurs.</p>
+                <a href="/Courses/Frontend" class="text-blue-600 font-semibold">Batafsil →</a>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+            <img src="/images/course2.jpg" class="w-full h-48 object-cover">
+            <div class="p-5">
+                <h3 class="font-semibold text-xl mb-2">Ingliz tili</h3>
+                <p class="text-gray-600 mb-4">Zero dan IELTSgacha bosqichma-bosqich o‘qitish.</p>
+                <a href="/Courses/English" class="text-blue-600 font-semibold">Batafsil →</a>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+            <img src="/images/course3.jpg" class="w-full h-48 object-cover">
+            <div class="p-5">
+                <h3 class="font-semibold text-xl mb-2">Python asoslari</h3>
+                <p class="text-gray-600 mb-4">Dasturlashga kirish va real loyihalar bilan o‘rganish.</p>
+                <a href="/Courses/Python" class="text-blue-600 font-semibold">Batafsil →</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- STUDENT REVIEWS SECTION -->
+<div class="mt-20">
+    <h2 class="text-3xl font-bold text-center mb-10">O‘quvchilar fikrlari</h2>
+
+    <div class="grid md:grid-cols-3 gap-8">
+        <div class="p-6 bg-white shadow-md rounded-xl">
+            <p class="text-gray-700 italic">"Ustozlarning tushuntirish uslubi zo'r, darslar juda qiziqarli!"</p>
+            <h4 class="mt-4 font-semibold text-blue-700">Aziza Q.</h4>
+        </div>
+
+        <div class="p-6 bg-white shadow-md rounded-xl">
+            <p class="text-gray-700 italic">"Frontend kursini bitirib hozir firmada ishlayapman."</p>
+            <h4 class="mt-4 font-semibold text-blue-700">Javohir S.</h4>
+        </div>
+
+        <div class="p-6 bg-white shadow-md rounded-xl">
+            <p class="text-gray-700 italic">"IELTS uchun tayyorlandim va 6.5 oldim, rahmat!"</p>
+            <h4 class="mt-4 font-semibold text-blue-700">Madina X.</h4>
+        </div>
+    </div>
+</div>
+
+
+<!-- CTA SECTION -->
+<div class="mt-20 text-center bg-blue-600 text-white py-12 rounded-xl">
+    <h2 class="text-3xl font-bold mb-4">O‘qishni bugundan boshlang!</h2>
+    <p class="mb-6">Eng yaxshi kurslarga hoziroq ro‘yxatdan o‘ting.</p>
+    <a href="/Auth/Register" class="bg-white text-blue-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-200">
+        Ro‘yxatdan o‘tish
+    </a>
+</div>

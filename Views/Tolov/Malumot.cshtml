@@ -1,0 +1,33 @@
+@model talim_platforma.Models.ViewModels.TalabaTolovHolatiViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "To‘lov holati";
+}
+
+<h2 class="mb-3">@Model.Talaba?.Familiya @Model.Talaba?.Ism - To‘lov holati</h2>
+
+<div class="table-responsive shadow-sm">
+    <table class="table table-hover text-center">
+        <thead class="table-light">
+            <tr>
+                <th>Kurs</th>
+                <th>Kurs narxi</th>
+                <th>Tolangan summa</th>
+                <th>Qarzdorlik</th>
+                <th>Haqdorlik</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var k in Model.KursHolati)
+            {
+                <tr>
+                    <td>@k.KursNomi</td>
+                    <td>@k.KursNarxi.ToString("N0")</td>
+                    <td>@k.Tolangan.ToString("N0")</td>
+                    <td>@k.Qarzdorlik.ToString("N0")</td>
+                    <td>@k.Haqdorlik.ToString("N0")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

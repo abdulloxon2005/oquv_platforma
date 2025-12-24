@@ -1,0 +1,137 @@
+@model talim_platforma.Models.ViewModels.AdminDashboardViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Dashboard</h2>
+        <p class="text-muted small mb-0">Talim Plus markazining umumiy ko‘rsatkichlari</p>
+    </div>
+    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2">
+        Yangilangan: @DateTime.Now.ToString("dd MMM, HH:mm")
+    </span>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Talabalar</div>
+                <h3 class="mb-0">@Model.TotalStudents</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-muted small mb-1">O‘qituvchilar</div>
+                <h3 class="mb-0">@Model.TotalTeachers</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Faol guruhlar</div>
+                <h3 class="mb-0">@Model.ActiveGroups</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Kurslar</div>
+                <h3 class="mb-0">@Model.TotalCourses</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Bugungi kirim</div>
+                <h3>@Model.TodaysIncome.ToString("N0") so‘m</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Joriy oy kirimi</div>
+                <h3>@Model.MonthlyIncome.ToString("N0") so‘m</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Yaqinlashayotgan imtihonlar</div>
+                <h3>@Model.UpcomingExams</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0">So‘nggi to‘lovlar</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentPayments.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var payment in Model.RecentPayments)
+                        {
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <div>
+                                    <div class="fw-semibold">@payment.Talaba?.Familiya @payment.Talaba?.Ism</div>
+                                    <small class="text-muted">@payment.Kurs?.Nomi — @payment.Sana.ToString("dd.MM.yyyy HH:mm")</small>
+                                </div>
+                                <span class="fw-semibold text-primary">@payment.Miqdor.ToString("N0") so‘m</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Hozircha to‘lovlar yo‘q</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0">Yaqinda yaratilgan guruhlar</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentGroups.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var group in Model.RecentGroups)
+                        {
+                            <li class="list-group-item px-0 d-flex justify-content-between">
+                                <div>
+                                    <div class="fw-semibold">@group.Nomi</div>
+                                    <small class="text-muted">@group.Kurs?.Nomi</small>
+                                </div>
+                                <span class="text-muted">@group.YaratilganVaqt.ToString("dd.MM")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Yangi guruhlar yaratilmagan.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

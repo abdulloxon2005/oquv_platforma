@@ -1,0 +1,16 @@
+@model talim_platforma.Models.Foydalanuvchi
+
+<h2>@Model.Ism @Model.Familiya @Model.OtasiningIsmi uchun Chat ID kiritish</h2>
+
+<form method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="form-group">
+        <label>Chat ID</label>
+        <input type="text" name="chatId" value="@Model.ChatId" class="form-control" required />
+    </div>
+
+    <br />
+    <button type="submit" class="btn btn-success">Saqlash</button>
+    <a asp-action="BotUlash" class="btn btn-secondary">Orqaga</a>
+</form>

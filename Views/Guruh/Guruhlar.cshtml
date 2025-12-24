@@ -1,0 +1,234 @@
+@model IEnumerable<talim_platforma.Models.Guruh>
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Guruhlar";
+    var antiForgeryToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">Guruhlar</h2>
+        <p class="text-muted small mb-0">Barcha ochilgan guruhlar ro‘yxati</p>
+    </div>
+    <a asp-action="GuruhQoshish" class="btn btn-primary">
+        ➕ Yangi guruh qo‘shish
+    </a>
+</div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Hozircha guruhlar mavjud emas.</div>
+    }
+    else
+    {
+        <div class="table-responsive shadow-sm">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Guruh nomi</th>
+                        <th>Kurs</th>
+                        <th>O‘qituvchi</th>
+                        <th>Dars kunlari</th>
+                        <th>Vaqti</th>
+                        <th>Xona</th>
+                        <th>Holati</th>
+                        <th>Boshlanish sanasi</th>
+                        <th>Talabalar</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Nomi</td>
+                            <td>@item.Kurs?.Nomi</td>
+                            <td>@item.Oqituvchi?.Ism</td>
+                            <td>@item.DarsKunlari</td>
+                            <td>@item.DarsVaqti.ToString("HH:mm")</td>
+                            <td>@item.Xona</td>
+                            <td>
+                                @if (item.Holati == "Faol")
+                                {
+                                    <span class="badge bg-success">Faol</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Tugallangan</span>
+                                }
+                            </td>
+                            <td>@item.BoshlanishSanasi.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                @if (item.TalabaGuruhlar != null && item.TalabaGuruhlar.Any())
+                                {
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var tg in item.TalabaGuruhlar)
+                                        {
+                                            var talaba = tg.Talaba;
+                                            if (talaba == null)
+                                            {
+                                                continue;
+                                            }
+                                            var badgeClass = talaba.Faolmi ? "student-active" : "student-inactive";
+                                            <span class="student-badge @badgeClass">@talaba.Ism @talaba.Familiya</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Talaba mavjud emas</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="GuruhTahrirlash" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1">
+                                    ✏️
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger me-1 delete-group-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteGroupModal"
+                                        data-group-id="@item.Id"
+                                        data-group-name="@item.Nomi">
+                                    🗑️
+                                </button>
+                                <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal" data-guruh-id="@item.Id">
+                                    👤
+                                </a>
+                                <a asp-action="Talabalar" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                    👥
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Modal: Talaba qo‘shish -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Talaba qo‘shish</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="studentSearchInput" class="form-control mb-2" placeholder="Ism yoki login bo‘yicha qidirish...">
+                <div id="studentSearchResults">
+                    <!-- Natijalar JS orqali yuklanadi -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Guruhni o'chirish modal -->
+<div class="modal fade" id="deleteGroupModal" tabindex="-1" aria-labelledby="deleteGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteGroupModalLabel">Guruhni o‘chirish</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Yopish"></button>
+            </div>
+            <div class="modal-body">
+                <p>Quyidagi guruhni o‘chirmoqchimisiz?</p>
+                <p class="fw-semibold" id="deleteGroupName"></p>
+                <div class="alert alert-warning small mb-0">
+                    Talabalar bilan bog‘liq ma’lumotlar ham o‘chirilishi mumkin.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteGroupForm" method="post" action="@Url.Action("GuruhOchirish", "Guruh")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteGroupId" />
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-danger">Ha, o‘chirish</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var currentGroupId = 0;
+
+    // Modal ochilganda guruh ID olish
+    var addStudentModal = document.getElementById('addStudentModal');
+    addStudentModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        currentGroupId = button.getAttribute('data-guruh-id');
+        document.getElementById('studentSearchInput').value = '';
+        document.getElementById('studentSearchResults').innerHTML = '';
+    });
+
+    // Qidiruv input
+    document.getElementById('studentSearchInput').addEventListener('input', function () {
+        var query = this.value;
+        if (query.length < 2) {
+            document.getElementById('studentSearchResults').innerHTML = '';
+            return;
+        }
+
+        fetch(`/Guruh/SearchStudent?query=${encodeURIComponent(query)}&guruhId=${currentGroupId}`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('studentSearchResults').innerHTML = html;
+            });
+    });
+
+    // Talabani guruhga qo‘shish
+    function addStudent(studentId) {
+        fetch('/Guruh/AddStudentToGroup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': '@antiForgeryToken'
+            },
+            body: JSON.stringify({ guruhId: parseInt(currentGroupId), talabaId: studentId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                alert('✅ Talaba muvaffaqiyatli qo‘shildi!');
+                var modal = bootstrap.Modal.getInstance(addStudentModal);
+                modal.hide();
+            } else {
+                alert('❌ Xatolik yuz berdi!');
+            }
+        });
+    }
+
+    // Guruh o'chirish modalini to'ldirish
+    const deleteGroupModal = document.getElementById("deleteGroupModal");
+    if (deleteGroupModal) {
+        deleteGroupModal.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+            document.getElementById("deleteGroupId").value = button.getAttribute("data-group-id");
+            document.getElementById("deleteGroupName").textContent = button.getAttribute("data-group-name");
+        });
+    }
+</script>
+}
+<style>
+    .student-badge {
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 0.85rem;
+    }
+    .student-active {
+        background-color: #ffffff;
+        border: 1px solid #198754;
+        color: #198754;
+    }
+    .student-inactive {
+        background-color: #e0e0e0;
+        color: #6c757d;
+    }
+</style>

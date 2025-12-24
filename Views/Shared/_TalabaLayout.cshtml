@@ -1,0 +1,91 @@
+@{
+    Layout = null;
+    var fullName = ViewBag.FullName as string;
+}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Talaba Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .sidebar-link.active {
+            background-color: #2563eb;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 fixed h-screen overflow-y-auto shadow-sm">
+            <div class="p-6 border-b border-gray-200">
+                <h1 class="text-lg font-bold text-gray-800">Talim Plus · Talaba</h1>
+            </div>
+            <nav class="p-4 space-y-1">
+                <a asp-controller="Oquvchi" asp-action="DashboardTalaba"
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors @(ViewContext.RouteData.Values["action"]?.ToString() == "DashboardTalaba" ? "active" : "")">
+                    🏠 Dashboard
+                </a>
+                <a asp-controller="Oquvchi" asp-action="DashboardTalaba" asp-fragment="imtihonlar"
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                    📝 Imtihonlar
+                </a>
+                <a asp-controller="Imtihon" asp-action="Sertifikatlar"
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors @(ViewContext.RouteData.Values["action"]?.ToString() == "Sertifikatlar" ? "active" : "")">
+                    📜 Natijalar & Sertifikatlar
+                </a>
+                <a asp-controller="Auth" asp-action="Logout"
+                   class="sidebar-link block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors mt-4">
+                    🚪 Chiqish
+                </a>
+            </nav>
+        </aside>
+
+        <div class="flex-1 ml-64">
+            <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
+                <div>
+                    @if (!string.IsNullOrEmpty(ViewData["Title"] as string))
+                    {
+                        <h2 class="text-lg font-semibold text-gray-800">
+                            @ViewData["Title"]
+                        </h2>
+                    }
+                </div>
+                <div class="flex items-center gap-3">
+                    @{
+                        var displayName = !string.IsNullOrWhiteSpace(fullName) ? fullName.Trim() : "Talaba";
+                        var initials = displayName[0].ToString().ToUpper();
+                    }
+                    <a asp-controller="Oquvchi" asp-action="Profil"
+                       class="flex items-center gap-3 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+                            @initials
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-sm font-medium text-gray-800">
+                                @displayName
+                            </span>
+                            <span class="text-xs text-gray-500">Kirish yo‘lakchasi</span>
+                        </div>
+                    </a>
+                </div>
+            </header>
+
+            <main class="p-6 space-y-4">
+                <div>
+                    @await Component.InvokeAsync("Ads", new { target = "student" })
+                </div>
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

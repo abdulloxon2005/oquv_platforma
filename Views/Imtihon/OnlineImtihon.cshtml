@@ -1,0 +1,171 @@
+@model int
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
+    Layout = "~/Views/Shared/_TalabaLayout.cshtml";
+    ViewData["Title"] = "Online imtihon";
+    var imtihon = ViewBag.Imtihon as talim_platforma.Models.Imtihon;
+    var muddat = (int)(ViewBag.Muddat ?? 60);
+    var antiForgeryToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
+<div class="max-w-5xl mx-auto space-y-4">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-200 bg-blue-500 text-white rounded-t-lg">
+            <h4 class="font-semibold flex items-center gap-2">
+                <span>📝</span>
+                <span>@imtihon?.Nomi</span>
+            </h4>
+            <p class="text-xs text-blue-50 mt-1">
+                Guruh: @imtihon?.Guruh?.Nomi | Muddat: @muddat daqiqa
+            </p>
+        </div>
+        <div class="px-5 py-5">
+            <div id="timer" class="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 text-center">
+                <h3 class="text-lg font-semibold text-yellow-800">
+                    Qolgan vaqt: <span id="timeLeft">@muddat:00</span>
+                </h3>
+            </div>
+
+            <form id="imtihonForm" class="space-y-4">
+                <input type="hidden" id="imtihonId" value="@Model" />
+                <input type="hidden" id="boshlanishVaqti" />
+
+                @if (imtihon?.Savollar != null && imtihon.Savollar.Any())
+                {
+                    int savolIndex = 1;
+                    foreach (var savol in imtihon.Savollar)
+                    {
+                        <div class="border border-gray-200 rounded-lg px-4 py-3 savol-card" data-savol-id="@savol.Id">
+                            <h5 class="text-sm font-semibold text-gray-800 mb-2">
+                                Savol @savolIndex: @savol.SavolMatni
+                            </h5>
+                            <div class="space-y-1">
+                                <label class="flex items-start gap-2 text-sm text-gray-700">
+                                    <input class="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                           type="radio" name="savol_@savol.Id" id="savol_@(savol.Id)_A" value="A" required>
+                                    <span>A) @savol.VariantA</span>
+                                </label>
+                                <label class="flex items-start gap-2 text-sm text-gray-700">
+                                    <input class="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                           type="radio" name="savol_@savol.Id" id="savol_@(savol.Id)_B" value="B" required>
+                                    <span>B) @savol.VariantB</span>
+                                </label>
+                                <label class="flex items-start gap-2 text-sm text-gray-700">
+                                    <input class="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                           type="radio" name="savol_@savol.Id" id="savol_@(savol.Id)_C" value="C" required>
+                                    <span>C) @savol.VariantC</span>
+                                </label>
+                                <label class="flex items-start gap-2 text-sm text-gray-700">
+                                    <input class="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                           type="radio" name="savol_@savol.Id" id="savol_@(savol.Id)_D" value="D" required>
+                                    <span>D) @savol.VariantD</span>
+                                </label>
+                            </div>
+                        </div>
+                        savolIndex++;
+                    }
+                }
+
+            <div class="mt-4 flex justify-end">
+                <button type="submit" class="inline-flex items-center px-6 py-2 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600 transition-colors" id="submitBtn">
+                        ✅ Imtihonni yakunlash
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let muddatDaqiqada = @muddat;
+    let qolganVaqt = muddatDaqiqada * 60; // sekundlarda
+    let timerInterval;
+    let autoSubmit = false;
+    let isSubmitting = false;
+
+    // Timer boshlash
+    document.getElementById('boshlanishVaqti').value = new Date().toISOString();
+    
+    function startTimer() {
+        timerInterval = setInterval(function() {
+            qolganVaqt--;
+            
+            const daqiqalar = Math.floor(qolganVaqt / 60);
+            const sekundlar = qolganVaqt % 60;
+            
+            document.getElementById('timeLeft').textContent = 
+                `${daqiqalar.toString().padStart(2, '0')}:${sekundlar.toString().padStart(2, '0')}`;
+            
+            if (qolganVaqt <= 0) {
+                clearInterval(timerInterval);
+                autoSubmit = true;
+                document.getElementById('imtihonForm').dispatchEvent(new Event('submit'));
+            }
+        }, 1000);
+    }
+
+    startTimer();
+
+    // Form yuborish
+    document.getElementById('imtihonForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (isSubmitting) return;
+
+        if (!autoSubmit) {
+            const ok = confirm('Imtihonni yakunlashni tasdiqlaysizmi? Keyin o\'zgartirib bo\'lmaydi.');
+            if (!ok) {
+                return;
+            }
+        }
+
+        clearInterval(timerInterval);
+        isSubmitting = true;
+        document.getElementById('submitBtn').setAttribute('disabled', 'disabled');
+
+        const javoblar = [];
+        const savollar = document.querySelectorAll('.savol-card');
+        
+        savollar.forEach(card => {
+            const savolId = parseInt(card.dataset.savolId);
+            const selected = card.querySelector('input[type="radio"]:checked');
+            
+            if (selected) {
+                javoblar.push({
+                    SavolId: savolId,
+                    TanlanganJavob: selected.value
+                });
+            }
+        });
+
+        const data = {
+            ImtihonId: parseInt(document.getElementById('imtihonId').value),
+            BoshlanishVaqti: document.getElementById('boshlanishVaqti').value,
+            Javoblar: javoblar
+        };
+
+        try {
+            const response = await fetch('/Imtihon/OnlineImtihonJavob', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': '@antiForgeryToken'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                window.location.href = '/Imtihon/NatijaTafsilot?natijaId=' + result.natijaId;
+            } else {
+                alert('Xatolik: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Xatolik yuz berdi');
+        }
+    });
+</script>
+

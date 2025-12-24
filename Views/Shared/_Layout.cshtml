@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Ta'lim Platformasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-white text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+
+            <a href="/" class="text-xl md:text-2xl font-bold text-blue-600">
+                🎓 Ta'lim Platformasi
+            </a>
+
+            <nav class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-700 hover:text-blue-600">Bosh sahifa</a>
+                <a href="/Courses" class="text-gray-700 hover:text-blue-600">Kurslar</a>
+                <a href="/Contact" class="text-gray-700 hover:text-blue-600">Bog‘lanish</a>
+                <a href="/Auth/Login" class="font-semibold text-gray-700 hover:text-blue-600">Kirish</a>
+            </nav>
+
+            <!-- Mobile Button -->
+            <button id="menuBtn" class="md:hidden text-3xl text-blue-600">
+                ☰
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden bg-white shadow-md md:hidden">
+            <nav class="px-4 py-4 space-y-3">
+                <a href="/" class="block text-gray-700 hover:text-blue-600">Bosh sahifa</a>
+                <a href="/Courses" class="block text-gray-700 hover:text-blue-600">Kurslar</a>
+                <a href="/Contact" class="block text-gray-700 hover:text-blue-600">Bog‘lanish</a>
+                <a href="/Auth/Login" class="block font-semibold text-gray-700 hover:text-blue-600">Kirish</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 flex-1 w-full">
+        <main class="py-6">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="bg-blue-700 text-white py-8 mt-10">
+        <div class="text-center">
+            <p>&copy; 2025 Talim Plus. Barcha huquqlar himoyalangan.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById("menuBtn").onclick = () =>
+            document.getElementById("mobileMenu").classList.toggle("hidden");
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

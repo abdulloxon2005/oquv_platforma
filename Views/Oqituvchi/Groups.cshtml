@@ -1,0 +1,483 @@
+@using talim_platforma.Models
+@{
+    ViewData["Title"] = "Guruhlar";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+@{
+    var guruhlar = ViewBag.Guruhlar as List<Guruh> ?? new List<Guruh>();
+    var tanlanganGuruh = ViewBag.TanlanganGuruh as Guruh;
+    var talabalar = ViewBag.Talabalar as List<Foydalanuvchi> ?? new List<Foydalanuvchi>();
+    var davomatlar = ViewBag.Davomatlar as List<Davomat> ?? new List<Davomat>();
+    var darsKunlari = ViewBag.DarsKunlari as List<DateTime> ?? new List<DateTime>();
+    var month = (int)ViewBag.Month;
+    var year = (int)ViewBag.Year;
+    var autoOpenModal = ViewBag.OpenAttendanceModal as bool? ?? false;
+    var todayString = DateTime.Today.ToString("yyyy-MM-dd");
+}
+
+<style>
+    .status-btn {
+        border-width: 1px;
+        border-color: #e5e7eb;
+        color: #6b7280;
+    }
+
+    .status-btn.active {
+        border-color: #2563eb;
+        background-color: #eff6ff;
+        color: #1d4ed8;
+    }
+</style>
+
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header + Actions -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">
+                @(tanlanganGuruh?.Nomi ?? "Guruh tanlang")
+            </h1>
+            @if (tanlanganGuruh != null)
+            {
+                <p class="mt-1 text-sm text-gray-500 flex items-center gap-2">
+                    <span>Guruh ID - #@tanlanganGuruh.Id</span>
+                    <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">
+                        @(tanlanganGuruh?.Kurs?.Nomi ?? "Kurs")
+                    </span>
+                </p>
+            }
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            <a href="@Url.Action("Index", "Imtihon", new { guruhId = tanlanganGuruh?.Id })"
+               class="inline-flex items-center px-5 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
+                Imtihonlar
+            </a>
+            @if (tanlanganGuruh != null)
+            {
+                var attendanceDisabled = !talabalar.Any();
+                <button type="button"
+                        id="openAttendanceModal"
+                        class="inline-flex items-center px-5 py-2 rounded-lg text-sm font-medium transition-colors @(attendanceDisabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-green-500 text-white hover:bg-green-600")"
+                        @(attendanceDisabled ? "disabled" : null)
+                        title="@(attendanceDisabled ? "Guruhda talaba yo'q" : "Davomat olish")">
+                    Davomat olish
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm px-5 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex items-center gap-3 text-sm text-gray-500">
+            <span>Oy bo‘yicha ko‘rish</span>
+            <div class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-sm text-gray-700 font-medium">
+                    @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month) / @year
+                </span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            @if (tanlanganGuruh != null)
+            {
+                <a href="@Url.Action("Groups", "Oqituvchi", new { id = tanlanganGuruh.Id, month = month == 1 ? 12 : month - 1, year = month == 1 ? year - 1 : year })"
+                   class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </a>
+            }
+            @if (tanlanganGuruh != null)
+            {
+                <a href="@Url.Action("Groups", "Oqituvchi", new { id = tanlanganGuruh.Id, month = month == 12 ? 1 : month + 1, year = month == 12 ? year + 1 : year })"
+                   class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Course Cards -->
+    @if (guruhlar.Any())
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            @foreach (var guruh in guruhlar)
+            {
+                var talabalarSoni = guruh.TalabaGuruhlar?.Count ?? 0;
+                var vaqt = guruh.DarsVaqti.ToString("HH:mm");
+                var isActive = tanlanganGuruh?.Id == guruh.Id;
+                
+                <a href="@Url.Action("Groups", "Oqituvchi", new { id = guruh.Id, month = month, year = year })"
+                   class="course-card block p-4 border-2 rounded-lg transition-all @(isActive ? "bg-blue-500 border-blue-500 text-white" : "bg-white border-gray-200 hover:border-gray-300 text-gray-800")">
+                    <div class="flex flex-col gap-1">
+                        <div class="font-semibold truncate">
+                            @(guruh.Kurs?.Nomi ?? "Kurs")
+                        </div>
+                        <div class="text-sm @(isActive ? "text-white/90" : "text-gray-600")">
+                            @vaqt · @talabalarSoni st
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+
+    <!-- Group content -->
+    @if (tanlanganGuruh != null)
+    {
+        @if (talabalar.Any())
+        {
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs md:text-sm font-semibold text-gray-700">#</th>
+                            <th class="px-4 py-3 text-left text-xs md:text-sm font-semibold text-gray-700">Talaba</th>
+                            <th class="px-4 py-3 text-left text-xs md:text-sm font-semibold text-gray-700">Status</th>
+                            <th class="px-4 py-3 text-left text-xs md:text-sm font-semibold text-gray-700">Kelgan darslar</th>
+                            @foreach (var sana in darsKunlari)
+                            {
+                                <th class="px-3 py-3 text-center text-xs md:text-sm font-semibold text-gray-700 whitespace-nowrap">
+                                    @sana.ToString("dd.MM")
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        @for (int i = 0; i < talabalar.Count; i++)
+                        {
+                            var talaba = talabalar[i];
+                            var talabaDavomatlar = davomatlar.Where(d => d.TalabaId == talaba.Id).ToList();
+
+                            var status = talaba.Faolmi ? "Faol" : "Guruhda";
+                            var statusColor = talaba.Faolmi ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800";
+
+                            var sca = talabaDavomatlar.Count(d => d.Holati == "Keldi" || d.Holati == "Kech keldi");
+
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-xs md:text-sm text-gray-700">@(i + 1)</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-sm text-gray-800 font-medium">
+                                        @talaba.Ism @talaba.Familiya
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium @statusColor">
+                                        @status
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-xs md:text-sm text-gray-700">@sca</td>
+                                @foreach (var sana in darsKunlari)
+                                {
+                                    var davomat = talabaDavomatlar.FirstOrDefault(d => d.Sana.Date == sana.Date);
+                                    <td class="px-3 py-3 text-center">
+                                        @if (davomat != null)
+                                        {
+                                            if (davomat.Holati == "Keldi")
+                                            {
+                                                <svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                </svg>
+                                            }
+                                            else if (davomat.Holati == "Kech keldi")
+                                            {
+                                                <svg class="w-5 h-5 text-orange-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                </svg>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-red-500">✗</span>
+                                            }
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+                <p class="text-gray-500">Bu guruhda hozircha talabalar yo‘q.</p>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+            <p class="text-gray-500">Guruh tanlang yoki guruhlar mavjud emas.</p>
+        </div>
+    }
+</div>
+
+@if (tanlanganGuruh != null && talabalar.Any())
+{
+    <div id="attendanceModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 bg-black/50 hidden">
+        <div id="attendanceModalBackdrop" class="absolute inset-0"></div>
+        <div class="relative bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wide">Guruh: @tanlanganGuruh.Nomi</p>
+                    <h3 class="text-lg font-semibold text-gray-800">Davomat olish</h3>
+                </div>
+                <button type="button" id="attendanceModalClose" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500">
+                    ✕
+                </button>
+            </div>
+
+            <div class="px-6 py-4 space-y-5">
+                <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+                    <div class="flex-1">
+                        <label for="attendance-date" class="block text-sm font-medium text-gray-600">
+                            Davomat sanasi
+                        </label>
+                        <input type="date"
+                               id="attendance-date"
+                               value="@todayString"
+                               class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2">
+                        <span class="flex items-center gap-1 text-green-600">
+                            <span class="text-lg">✔</span> Keldi
+                        </span>
+                        <span class="flex items-center gap-1 text-amber-500">
+                            <span class="text-lg">⏰</span> Kech keldi
+                        </span>
+                        <span class="flex items-center gap-1 text-red-500">
+                            <span class="text-lg">✖</span> Kelmagan
+                        </span>
+                    </div>
+                </div>
+
+                <div id="attendanceMessage" class="hidden text-sm rounded-lg px-4 py-2"></div>
+
+                <form id="attendanceForm"
+                      data-group-id="@tanlanganGuruh.Id"
+                      data-save-url="@Url.Action("SaveAttendance", "Oqituvchi")"
+                      data-load-url="@Url.Action("LoadAttendance", "Oqituvchi")"
+                      class="space-y-4">
+                    @Html.AntiForgeryToken()
+                    @foreach (var talaba in talabalar.OrderBy(t => t.Ism))
+                    {
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border border-gray-200 rounded-xl px-4 py-3" data-student-id="@talaba.Id">
+                            <div>
+                                <p class="font-semibold text-gray-800">@talaba.Ism @talaba.Familiya</p>
+                                <p class="text-sm text-gray-500 status-label">Belgilanmagan</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" class="status-btn rounded-full w-10 h-10 flex items-center justify-center" data-status="Keldi" title="Keldi">
+                                    ✔
+                                </button>
+                                <button type="button" class="status-btn rounded-full w-10 h-10 flex items-center justify-center" data-status="Kech keldi" title="Kech keldi">
+                                    ⏰
+                                </button>
+                                <button type="button" class="status-btn rounded-full w-10 h-10 flex items-center justify-center" data-status="Kelmadi" title="Kelmagan">
+                                    ✖
+                                </button>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between pt-4 border-t border-gray-100">
+                        <p class="text-sm text-gray-500">Saqlangach ota-onalarga Telegram orqali avtomatik xabar yuboriladi.</p>
+                        <div class="flex items-center gap-3">
+                            <button type="button" id="attendanceModalCancel" class="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">
+                                Bekor qilish
+                            </button>
+                            <button type="submit"
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                Saqlash
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('attendanceModal');
+            const modalBackdrop = document.getElementById('attendanceModalBackdrop');
+            const modalClose = document.getElementById('attendanceModalClose');
+            const modalCancel = document.getElementById('attendanceModalCancel');
+            const openModalBtn = document.getElementById('openAttendanceModal');
+
+            function updateSectionParam(isOpen) {
+                const url = new URL(window.location.href);
+                if (isOpen) {
+                    url.searchParams.set('section', 'MarkAttendance');
+                } else {
+                    url.searchParams.delete('section');
+                }
+                window.history.replaceState({}, document.title, url);
+            }
+
+            function openModal() {
+                if (!modal) {
+                    updateSectionParam(false);
+                    return;
+                }
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+                updateSectionParam(true);
+            }
+
+            function closeModal() {
+                if (!modal) return;
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+                updateSectionParam(false);
+            }
+
+            openModalBtn?.addEventListener('click', openModal);
+            modalClose?.addEventListener('click', closeModal);
+            modalCancel?.addEventListener('click', closeModal);
+            modalBackdrop?.addEventListener('click', closeModal);
+            document.addEventListener('keydown', (evt) => {
+                if (evt.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            const shouldAutoOpen = '@(autoOpenModal ? "true" : "false")' === 'true';
+            if (shouldAutoOpen) {
+                openModal();
+            }
+
+            const form = document.getElementById('attendanceForm');
+            if (!form) {
+                return;
+            }
+
+            const dateInput = document.getElementById('attendance-date');
+            const messageBox = document.getElementById('attendanceMessage');
+            const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+            const groupId = form.dataset.groupId;
+            const loadUrl = form.dataset.loadUrl;
+            const saveUrl = form.dataset.saveUrl;
+
+            const statusColors = {
+                'Keldi': 'text-green-600',
+                'Kech keldi': 'text-amber-500',
+                'Kelmadi': 'text-red-500'
+            };
+
+            function setMessage(text, type) {
+                messageBox.textContent = text;
+                messageBox.classList.remove('hidden', 'bg-green-50', 'text-green-700', 'bg-red-50', 'text-red-700');
+                if (type === 'success') {
+                    messageBox.classList.add('bg-green-50', 'text-green-700');
+                } else {
+                    messageBox.classList.add('bg-red-50', 'text-red-700');
+                }
+            }
+
+            function resetMessage() {
+                messageBox.classList.add('hidden');
+                messageBox.textContent = '';
+            }
+
+            function setRowStatus(row, status) {
+                row.dataset.selectedStatus = status || '';
+                const label = row.querySelector('.status-label');
+                label.textContent = status || 'Belgilanmagan';
+                label.className = 'text-sm status-label ' + (status ? `font-semibold ${statusColors[status] ?? 'text-gray-600'}` : 'text-gray-400');
+                row.querySelectorAll('.status-btn').forEach(button => {
+                    button.classList.toggle('active', button.dataset.status === status);
+                });
+            }
+
+            document.querySelectorAll('#attendanceForm [data-student-id]').forEach(row => {
+                row.querySelectorAll('.status-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        setRowStatus(row, button.dataset.status);
+                    });
+                });
+            });
+
+            async function loadAttendanceData() {
+                resetMessage();
+                try {
+                    const response = await fetch(`${loadUrl}?guruhId=${groupId}&sana=${dateInput.value}`);
+                    const data = await response.json();
+                    if (data.success) {
+                        document.querySelectorAll('#attendanceForm [data-student-id]').forEach(row => setRowStatus(row, ''));
+                        data.students.forEach(item => {
+                            const row = document.querySelector(`#attendanceForm [data-student-id="${item.talabaId}"]`);
+                            if (row) {
+                                setRowStatus(row, item.holat || '');
+                            }
+                        });
+                        setMessage('Davomat ma\'lumotlari yangilandi.', 'success');
+                    } else {
+                        setMessage(data.message || 'Ma\'lumotni yuklashda xatolik.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setMessage('Server bilan bog‘lanib bo‘lmadi.', 'error');
+                }
+            }
+
+            loadAttendanceData();
+            dateInput.addEventListener('change', loadAttendanceData);
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                resetMessage();
+
+                const talabalar = Array.from(document.querySelectorAll('#attendanceForm [data-student-id]'))
+                    .map(row => ({
+                        talabaId: Number(row.dataset.studentId),
+                        holati: row.dataset.selectedStatus || ''
+                    }))
+                    .filter(item => item.holati);
+
+                if (!talabalar.length) {
+                    setMessage('Hech bo‘lmasa bitta talaba uchun holat tanlang.', 'error');
+                    return;
+                }
+
+                const payload = {
+                    guruhId: Number(groupId),
+                    sana: dateInput.value,
+                    talabalar
+                };
+
+                try {
+                    const response = await fetch(saveUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        setMessage('Davomat muvaffaqiyatli saqlandi.', 'success');
+                        await loadAttendanceData();
+                    } else {
+                        setMessage(data.message || 'Davomatni saqlashda xatolik.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setMessage('Server bilan bog‘lanib bo‘lmadi.', 'error');
+                }
+            });
+        });
+    </script>
+}
+

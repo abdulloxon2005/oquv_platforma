@@ -1,0 +1,47 @@
+@model talim_platforma.Models.TalabaKursEditViewModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Talabani Kurs(lar)ga Tahrirlash";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>@ViewData["Title"]</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Orqaga
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Tahrirlash" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <!-- Talaba tanlash -->
+            <div class="mb-3">
+                <label class="form-label">Talaba:</label>
+                <select asp-for="TalabaId" asp-items="ViewBag.Talabalar" class="form-select" required>
+                    <option value="">-- Talabani tanlang --</option>
+                </select>
+            </div>
+
+            <!-- Kurslar tanlash -->
+            <div class="mb-3">
+                <label class="form-label">Kurslar (bir nechta tanlash mumkin):</label>
+                <select asp-for="Kurslar" asp-items="ViewBag.Kurslar" multiple class="form-select" size="6" required>
+                </select>
+                <small class="text-muted d-block mt-1">
+                    Ctrl (yoki Mac’da Cmd) bosib bir nechta kurs tanlang
+                </small>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fas fa-check me-1"></i> Saqlash
+                </button>
+                <a asp-action="Index" class="btn btn-secondary px-4">Bekor qilish</a>
+            </div>
+        </form>
+    </div>
+</div>

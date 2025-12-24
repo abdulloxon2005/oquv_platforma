@@ -1,0 +1,192 @@
+@model IEnumerable<talim_platforma.Models.ImtihonNatija>
+@using Microsoft.AspNetCore.Antiforgery
+@using talim_platforma.Helpers
+@inject IAntiforgery Antiforgery
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    ViewData["Title"] = "Imtihon natijalari";
+    var imtihon = ViewBag.Imtihon as talim_platforma.Models.Imtihon;
+    var jamiSavollar = (int)(ViewBag.JamiSavollar ?? 0);
+    var jamiBall = (int)(ViewBag.JamiBall ?? 0);
+    var antiForgeryToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+    var manualStats = ViewBag.NatijaManualStats as Dictionary<int, ManualResultHelper.ManualResultSummary> ?? new();
+}
+
+<div class="max-w-7xl mx-auto space-y-4">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-200 bg-green-500 text-white rounded-t-lg">
+            <h4 class="font-semibold flex items-center gap-2">
+                <span>📊</span>
+                <span>@imtihon?.Nomi - Natijalar</span>
+            </h4>
+            <p class="text-xs text-green-50 mt-1">
+                Jami savollar: @jamiSavollar | Jami ball: @jamiBall
+            </p>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm px-5 py-8 text-center text-gray-500 text-sm">
+            Hozircha natijalar mavjud emas.
+        </div>
+    }
+    else
+    {
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">#</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Talaba</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Telefon</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Ball</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Foiz</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">To'g'ri javob</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Holat</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Sana</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Amallar</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach (var natija in Model)
+                    {
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-gray-700">@natija.Id</td>
+                            <td class="px-4 py-3">
+                                <div class="font-medium text-gray-900">
+                                    @natija.Talaba?.Familiya @natija.Talaba?.Ism
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-gray-700">@natija.Talaba?.TelefonRaqam</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    @natija.UmumiyBall / @natija.MaksimalBall
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium @(natija.FoizNatija >= (imtihon?.MinimalBall ?? 60) ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")">
+                                    @natija.FoizNatija.ToString("F2")%
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-gray-700">
+                                @{
+                                    manualStats.TryGetValue(natija.Id, out ManualResultHelper.ManualResultSummary? summary);
+                                    var correctCount = summary?.CorrectAnswers;
+                                    var totalCount = summary?.TotalQuestions ?? jamiSavollar;
+                                }
+                               @if (correctCount.HasValue && totalCount > 0)
+                                {
+                                    <span>@correctCount / @totalCount</span>
+                                }
+
+                                else if (correctCount.HasValue)
+                                {
+                                    <span>@correctCount</span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400">—</span>
+                                }
+                            </td>
+                            <td class="px-4 py-3">
+                                @if (natija.Otdimi)
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        ✅ O'tdi
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        ❌ O'tmadi
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+                                @natija.Sana.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap gap-1">
+                                    <a asp-action="NatijaTafsilot" asp-route-natijaId="@natija.Id"
+                                       class="inline-flex items-center justify-center px-2 py-1 rounded-md border border-blue-200 text-blue-600 text-xs hover:bg-blue-50">
+                                        👁️
+                                    </a>
+                                    @if (natija.Otdimi && imtihon.SertifikatBeriladimi)
+                                    {
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center px-2 py-1 rounded-md border border-green-200 text-green-600 text-xs hover:bg-green-50"
+                                                onclick="sertifikatBerish(@natija.Id)">
+                                            🎓
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="rounded-lg bg-green-500 text-white px-4 py-3 text-center">
+                <div class="text-lg font-semibold">
+                    @Model.Count(n => n.Otdimi)
+                </div>
+                <div class="text-xs uppercase tracking-wide">O'tganlar</div>
+            </div>
+            <div class="rounded-lg bg-red-500 text-white px-4 py-3 text-center">
+                <div class="text-lg font-semibold">
+                    @Model.Count(n => !n.Otdimi)
+                </div>
+                <div class="text-xs uppercase tracking-wide">O'tmaganlar</div>
+            </div>
+            <div class="rounded-lg bg-blue-500 text-white px-4 py-3 text-center">
+                <div class="text-lg font-semibold">
+                    @Model.Count()
+                </div>
+                <div class="text-xs uppercase tracking-wide">Jami</div>
+            </div>
+        </div>
+    }
+
+    <div class="flex flex-wrap gap-2">
+        <a asp-action="NatijalarPdf" asp-route-id="@imtihon?.Id"
+           class="inline-flex items-center px-4 py-2 rounded-lg border border-blue-500 text-blue-600 text-sm font-medium hover:bg-blue-50 transition-colors">
+            📄 Natijalarni PDF yuklab olish
+        </a>
+        <a asp-action="Index"
+           class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+            ← Orqaga
+        </a>
+    </div>
+</div>
+
+<script>
+    function sertifikatBerish(natijaId) {
+        if (!confirm('Sertifikat berishni tasdiqlaysizmi?')) return;
+
+        fetch('/Imtihon/SertifikatBerish', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': '@antiForgeryToken'
+            },
+            body: JSON.stringify({ natijaId: natijaId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Xatolik: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Xatolik yuz berdi');
+        });
+    }
+</script>
+

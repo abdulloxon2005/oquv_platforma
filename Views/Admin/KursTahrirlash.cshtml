@@ -1,0 +1,42 @@
+@model talim_platforma.Models.Kurs
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Kursni tahrirlash";
+}
+
+<div class="mb-3">
+    <h2 class="mb-1">Kursni tahrirlash</h2>
+    <p class="text-muted small mb-0">Mavjud kurs ma'lumotlarini yangilang</p>
+</div>
+
+<form asp-action="KursTahrirlash" method="post" class="mt-3">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label class="form-label">Kurs nomi</label>
+        <input asp-for="Nomi" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Tavsif</label>
+        <textarea asp-for="Tavsif" class="form-control" rows="3"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Darajasi</label>
+        <input asp-for="Darajasi" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Narxi</label>
+        <input asp-for="Narxi" type="number" class="form-control" />
+    </div>
+
+    <div class="d-flex justify-content-between mt-3">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> Saqlash
+        </button>
+        <a asp-action="Kurslar" class="btn btn-outline-secondary">Orqaga</a>
+    </div>
+</form>

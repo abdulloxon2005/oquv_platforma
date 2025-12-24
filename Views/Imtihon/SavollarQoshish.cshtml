@@ -1,0 +1,322 @@
+@model int
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    ViewData["Title"] = "Savollar qo'shish";
+    var imtihon = ViewBag.Imtihon as talim_platforma.Models.Imtihon;
+    var savollar = ViewBag.Savollar as List<talim_platforma.Models.ImtihonSavol> ?? new List<talim_platforma.Models.ImtihonSavol>();
+    var antiForgeryToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
+<div class="max-w-7xl mx-auto space-y-4">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-200 bg-blue-500 text-white rounded-t-lg">
+            <h4 class="font-semibold flex items-center gap-2">
+                <span>📝</span>
+                <span>Imtihon: @imtihon?.Nomi</span>
+            </h4>
+            <p class="text-xs text-blue-50 mt-1">
+                Guruh: @imtihon?.Guruh?.Nomi | Format: @imtihon?.ImtihonFormati
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="space-y-4">
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div class="px-5 py-3 border-b border-gray-200 bg-blue-500 text-white rounded-t-lg">
+                    <h5 class="font-semibold text-sm">➕ Yangi savol qo'shish</h5>
+                </div>
+                <div class="px-5 py-4">
+                    <form id="savolForm" class="space-y-3">
+                        <input type="hidden" id="imtihonId" value="@Model" />
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Savol matni *</label>
+                            <textarea id="savolMatni" rows="3" required
+                                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Variant A *</label>
+                                <input type="text" id="variantA" required
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Variant B *</label>
+                                <input type="text" id="variantB" required
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Variant C *</label>
+                                <input type="text" id="variantC" required
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Variant D *</label>
+                                <input type="text" id="variantD" required
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">To'g'ri javob *</label>
+                                <select id="togriJavob" required
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Tanlang</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Ball qiymati *</label>
+                                <input type="number" id="ballQiymati" min="1" max="100" value="1" required
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                                class="w-full inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors">
+                            ✅ Savol qo'shish
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div class="px-5 py-3 border-b border-gray-200 bg-purple-500 text-white rounded-t-lg">
+                    <h5 class="font-semibold text-sm">🤖 PDF/Word fayldan avtomatik qo'shish</h5>
+                </div>
+                <div class="px-5 py-4 space-y-4">
+                    <p class="text-sm text-gray-600">
+                        Belgilangan tartibda tayyorlangan .pdf, .docx yoki .txt faylni yuklab, savollarni bir necha soniyada qo'shing.
+                    </p>
+
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-700 space-y-2">
+                        <p class="font-semibold text-gray-800">Belgilar qoidası:</p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><span class="font-mono text-gray-900">? Savol matni</span></li>
+                            <li><span class="font-mono text-green-700">+ To'g'ri javob</span></li>
+                            <li><span class="font-mono text-red-700">- Noto'g'ri javob</span></li>
+                            <li><span class="font-mono text-blue-700">#ball=3</span> (ixtiyoriy) – shu savol balli</li>
+                        </ul>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs font-mono whitespace-pre-line">
+? 2 ning kvadrati nechaga teng?
++ 4
+- 6
+- 2
+- 8
+#ball=2
+                        </pre>
+                        <p class="text-xs text-gray-500">Bir savol uchun kamida 4 ta javob kiriting va faqat bitta javobni <span class="font-semibold">(+)</span> bilan belgilang.</p>
+                    </div>
+
+                    <form id="bulkImportForm" class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Faylni tanlang *</label>
+                            <input type="file" id="bulkFile" accept=".pdf,.docx,.txt" required
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-purple-100 file:text-purple-700" />
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Standart ball *</label>
+                                <input type="number" id="bulkDefaultBall" min="1" value="1"
+                                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
+                            </div>
+                            <div class="text-sm text-gray-500 flex items-end">
+                                <p>Faylda <span class="font-semibold">#ball=</span> ko'rsatilmasa shu qiymat olinadi.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-purple-500 text-white text-sm font-medium hover:bg-purple-600 transition-colors">
+                                ⚡ Avtomatik qo'shish
+                            </button>
+                            <p id="bulkImportStatus" class="text-xs text-gray-500 min-h-[1.5rem]"></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div class="px-5 py-3 border-b border-gray-200 bg-green-500 text-white rounded-t-lg">
+                <h5 class="font-semibold text-sm">📋 Savollar ro'yxati (@savollar.Count ta)</h5>
+            </div>
+            <div class="px-5 py-4">
+                @if (!savollar.Any())
+                {
+                    <div class="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-sm text-blue-800">
+                        Hozircha savollar mavjud emas. Birinchi savolni qo'shing.
+                    </div>
+                }
+                else
+                {
+                    <div id="savollarList" class="space-y-2">
+                        @foreach (var savol in savollar)
+                        {
+                            <div class="border border-gray-200 rounded-lg px-4 py-3 flex items-start justify-between gap-3 bg-white savol-item" data-id="@savol.Id">
+                                <div class="flex-1">
+                                    <div class="font-medium text-gray-900">@savol.SavolMatni</div>
+                                    <div class="mt-1 text-xs text-gray-600 space-y-0.5">
+                                        <div>A) @savol.VariantA</div>
+                                        <div>B) @savol.VariantB</div>
+                                        <div>C) @savol.VariantC</div>
+                                        <div>D) @savol.VariantD</div>
+                                    </div>
+                                    <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">
+                                            To'g'ri: @savol.TogriJavob
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium">
+                                            Ball: @savol.BallQiymati
+                                        </span>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                        class="inline-flex items-center justify-center px-2 py-1 rounded-md border border-red-200 text-red-600 text-xs hover:bg-red-50"
+                                        onclick="ochirishSavol(@savol.Id)">
+                                    🗑️
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-3 text-sm text-gray-700">
+                        <strong>Jami ball: @savollar.Sum(s => s.BallQiymati)</strong>
+                    </div>
+
+                    <div class="mt-4">
+                        <a asp-action="Tafsilot" asp-route-id="@Model"
+                           class="w-full inline-flex items-center justify-center px-4 py-2 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600 transition-colors">
+                            ✅ Tugatish va imtihonni ko'rish
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('savolForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const data = {
+            ImtihonId: parseInt(document.getElementById('imtihonId').value),
+            SavolMatni: document.getElementById('savolMatni').value,
+            VariantA: document.getElementById('variantA').value,
+            VariantB: document.getElementById('variantB').value,
+            VariantC: document.getElementById('variantC').value,
+            VariantD: document.getElementById('variantD').value,
+            TogriJavob: document.getElementById('togriJavob').value,
+            BallQiymati: parseInt(document.getElementById('ballQiymati').value)
+        };
+
+        try {
+            const response = await fetch('/Imtihon/SavolQoshish', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': '@antiForgeryToken'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Savol muvaffaqiyatli qo\'shildi!');
+                location.reload();
+            } else {
+                alert('Xatolik: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Xatolik yuz berdi');
+        }
+    });
+
+    const bulkImportForm = document.getElementById('bulkImportForm');
+    const bulkImportStatus = document.getElementById('bulkImportStatus');
+
+    if (bulkImportForm) {
+        bulkImportForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!bulkImportStatus) return;
+
+            const fileInput = document.getElementById('bulkFile');
+            if (!fileInput.files.length) {
+                bulkImportStatus.textContent = 'Iltimos, fayl tanlang.';
+                bulkImportStatus.className = 'text-xs text-red-600';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('imtihonId', document.getElementById('imtihonId').value);
+            formData.append('defaultBall', document.getElementById('bulkDefaultBall').value || '1');
+            formData.append('file', fileInput.files[0]);
+
+            bulkImportStatus.textContent = 'Fayl qayta ishlanmoqda...';
+            bulkImportStatus.className = 'text-xs text-gray-600';
+
+            try {
+                const response = await fetch('/Imtihon/SavollarImport', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': '@antiForgeryToken'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    bulkImportStatus.textContent = result.message + (result.skipped ? ` (O'tkazib yuborilgan: ${result.skipped})` : '');
+                    bulkImportStatus.className = 'text-xs text-green-600';
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    bulkImportStatus.textContent = result.message || 'Import qilishda xatolik.';
+                    bulkImportStatus.className = 'text-xs text-red-600';
+                }
+            } catch (error) {
+                console.error(error);
+                bulkImportStatus.textContent = 'Server bilan bog\'lanib bo\'lmadi.';
+                bulkImportStatus.className = 'text-xs text-red-600';
+            }
+        });
+    }
+
+    function ochirishSavol(id) {
+        if (!confirm('Savolni o\'chirishni tasdiqlaysizmi?')) return;
+
+        fetch('/Imtihon/SavolOchirish', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': '@antiForgeryToken'
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Xatolik: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Xatolik yuz berdi');
+        });
+    }
+</script>
+

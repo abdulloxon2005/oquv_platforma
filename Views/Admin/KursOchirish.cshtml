@@ -1,0 +1,15 @@
+@model talim_platforma.Models.Kurs
+
+@{
+    ViewData["Title"] = "Kursni o‘chirish";
+}
+
+<div class="container mt-4">
+    <h3>Haqiqatan ham "<b>@Model.Nomi</b>" kursini o‘chirmoqchimisiz?</h3>
+
+    <form asp-action="KursOchirish" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Ha, o‘chirilsin</button>
+        <a asp-action="Kurslar" class="btn btn-secondary">Yo‘q, bekor qilish</a>
+    </form>
+</div>

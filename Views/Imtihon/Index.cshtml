@@ -1,0 +1,602 @@
+@model IEnumerable<talim_platforma.Models.Imtihon>
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    ViewData["Title"] = "Imtihonlar";
+    var antiForgeryToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+    var groupSelectList = ViewBag.Guruhlar as SelectList;
+}
+
+<div class="max-w-7xl mx-auto space-y-4">
+    <!-- Header -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+            <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                <span>📝</span> <span>Imtihonlar</span>
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Barcha imtihonlar ro'yxati
+            </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <button type="button"
+                    id="openOfflineResultsModal"
+                    class="inline-flex items-center justify-center px-5 py-2 rounded-lg border border-indigo-200 text-indigo-600 text-sm font-medium hover:bg-indigo-50 transition-colors">
+                🧾 Imtihon natijalarini qo‘shish
+            </button>
+            <a asp-action="Yaratish"
+               class="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors">
+                ➕ Yangi imtihon
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-50 border border-green-200 text-green-800 text-sm rounded-lg px-4 py-3 flex justify-between items-center">
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg px-4 py-3 flex justify-between items-center">
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!-- Filtrlar -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm px-5 py-4">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Guruh</label>
+                @if (ViewBag.Guruhlar != null)
+                {
+                    @Html.DropDownList("guruhId", (SelectList)ViewBag.Guruhlar, "Barcha guruhlar", new { @class = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                }
+                else
+                {
+                    <select name="guruhId" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Barcha guruhlar</option>
+                    </select>
+                }
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                @if (ViewBag.Formatlar != null)
+                {
+                    @Html.DropDownList("format", (SelectList)ViewBag.Formatlar, "Barcha formatlar", new { @class = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                }
+                else
+                {
+                    <select name="format" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Barcha formatlar</option>
+                        <option value="Online">Online</option>
+                        <option value="Offline">Offline</option>
+                    </select>
+                }
+            </div>
+            <div class="flex items-end gap-2">
+                <button type="submit"
+                        class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-blue-500 text-blue-600 text-sm font-medium hover:bg-blue-50 transition-colors">
+                    🔍 Qidirish
+                </button>
+                <a asp-action="Index"
+                   class="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+                    🔄 Tozalash
+                </a>
+            </div>
+        </form>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm px-5 py-8 text-center text-gray-500 text-sm">
+            Hozircha imtihonlar mavjud emas.
+        </div>
+    }
+    else
+    {
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">#</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Imtihon nomi</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Guruh</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Kurs</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Turi</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Format</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Sana</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Savollar</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Natijalar</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Holati</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Amallar</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach (var item in Model)
+                    {
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-gray-700">@item.Id</td>
+                            <td class="px-4 py-3">
+                                <div class="font-medium text-gray-900">@item.Nomi</div>
+                            </td>
+                            <td class="px-4 py-3 text-gray-700">@item.Guruh?.Nomi</td>
+                            <td class="px-4 py-3 text-gray-700">@item.Guruh?.Kurs?.Nomi</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    @item.ImtihonTuri
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                @if (item.ImtihonFormati == "Online")
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        🌐 Online
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        📄 Offline
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-gray-700 whitespace-nowrap">@item.Sana.ToString("dd.MM.yyyy")</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    @(item.Savollar?.Count ?? 0) ta
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    @(item.Natijalar?.Count ?? 0) ta
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                @if (item.Faolmi)
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Faol
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                        Nofaol
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex flex-wrap gap-1">
+                                    <a asp-action="Tafsilot" asp-route-id="@item.Id"
+                                       class="inline-flex items-center justify-center px-2 py-1 rounded-md border border-blue-200 text-blue-600 text-xs hover:bg-blue-50"
+                                       title="Tafsilotlar">
+                                        👁️
+                                    </a>
+                                    <a asp-action="Natijalar" asp-route-id="@item.Id"
+                                       class="inline-flex items-center justify-center px-2 py-1 rounded-md border border-green-200 text-green-600 text-xs hover:bg-green-50"
+                                       title="Natijalar">
+                                        📊
+                                    </a>
+                                    @if (item.ImtihonFormati == "Online")
+                                    {
+                                        <button type="button"
+                                                class="inline-flex items-center justify-center px-2 py-1 rounded-md border border-indigo-200 text-indigo-600 text-xs hover:bg-indigo-50"
+                                                onclick="startOnlineExam(@item.Id)"
+                                                title="Imtihonni boshlash (davomatdan so‘ng)">
+                                            ▶️
+                                        </button>
+                                    }
+                                    <a asp-action="Tahrirlash" asp-route-id="@item.Id"
+                                       class="inline-flex items-center justify-center px-2 py-1 rounded-md border border-yellow-200 text-yellow-600 text-xs hover:bg-yellow-50"
+                                       title="Tahrirlash">
+                                        ✏️
+                                    </a>
+                                    <button type="button"
+                                            class="inline-flex items-center justify-center px-2 py-1 rounded-md border border-red-200 text-red-600 text-xs hover:bg-red-50"
+                                            onclick="ochirishImtihon(@item.Id)"
+                                            title="O'chirish">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div id="offlineResultsModal" class="fixed inset-0 z-50 hidden">
+    <div id="offlineResultsBackdrop" class="absolute inset-0 bg-black/50"></div>
+    <div class="relative bg-white w-full max-w-5xl mx-auto my-10 rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh]">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <div>
+                <p class="text-xs text-gray-500 uppercase tracking-wide">Offline imtihon</p>
+                <h3 class="text-lg font-semibold text-gray-800">Natijalarni qo‘shish</h3>
+            </div>
+            <button type="button" id="offlineResultsClose" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100">
+                ✕
+            </button>
+        </div>
+
+        <div class="px-6 py-4 space-y-4 overflow-y-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Guruh *</label>
+                    <select id="offlineGroupSelect"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Guruh tanlang</option>
+                        @if (groupSelectList != null)
+                        {
+                            foreach (var option in groupSelectList)
+                            {
+                                <option value="@option.Value">@option.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Imtihon *</label>
+                    <select id="offlineExamSelect"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            disabled>
+                        <option value="">Avval guruhni tanlang</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="offlineExamInfo" class="hidden rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                <div class="flex flex-wrap gap-4">
+                    <span><strong>Guruh:</strong> <span data-field="group">-</span></span>
+                    <span><strong>Sana:</strong> <span data-field="date">-</span></span>
+                    <span><strong>Jami savollar:</strong> <span data-field="questions">-</span></span>
+                    <span><strong>Maks. ball:</strong> <span data-field="max-ball">-</span></span>
+                    <span><strong>Minimal foiz:</strong> <span data-field="min-percent">-</span></span>
+                </div>
+            </div>
+
+            <div id="offlineResultsMessage" class="hidden text-sm rounded-lg px-4 py-2"></div>
+
+            <div id="offlineStudentsContainer" class="hidden space-y-3 max-h-[50vh] overflow-y-auto pr-1"></div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-gray-200 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <p class="text-xs text-gray-500">Har bir talaba uchun ballni kiriting. To'g'ri javoblarni kiritish ixtiyoriy.</p>
+            <div class="flex gap-3">
+                <button type="button" id="offlineResultsCancel"
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50">
+                    Bekor qilish
+                </button>
+                <button type="button" id="offlineResultsSave" disabled
+                        class="px-5 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    💾 Natijalarni saqlash
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function ochirishImtihon(id) {
+        if (!confirm('Imtihonni o\'chirishni tasdiqlaysizmi?')) return;
+
+        fetch('/Imtihon/Ochirish', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': '@antiForgeryToken'
+            },
+            body: JSON.stringify({ id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Xatolik: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Xatolik yuz berdi');
+        });
+    }
+
+    function startOnlineExam(id) {
+        if (!confirm('Online imtihonni boshlashni tasdiqlaysizmi? Davomat olingan bo‘lishi kerak.')) {
+            return;
+        }
+
+        fetch('/Imtihon/StartOnline', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': '@antiForgeryToken'
+            },
+            body: JSON.stringify({ id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || 'Natija qabul qilindi.');
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(() => alert('Xatolik yuz berdi'));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('offlineResultsModal');
+        const openBtn = document.getElementById('openOfflineResultsModal');
+        const closeBtn = document.getElementById('offlineResultsClose');
+        const cancelBtn = document.getElementById('offlineResultsCancel');
+        const backdrop = document.getElementById('offlineResultsBackdrop');
+        const groupSelect = document.getElementById('offlineGroupSelect');
+        const examSelect = document.getElementById('offlineExamSelect');
+        const examInfo = document.getElementById('offlineExamInfo');
+        const infoFields = examInfo?.querySelectorAll('[data-field]');
+        const studentsContainer = document.getElementById('offlineStudentsContainer');
+        const messageBox = document.getElementById('offlineResultsMessage');
+        const saveBtn = document.getElementById('offlineResultsSave');
+        const token = '@antiForgeryToken';
+        const examsUrl = '@Url.Action("GetOfflineExams", "Imtihon")';
+        const studentsUrl = '@Url.Action("LoadOfflineStudents", "Imtihon")';
+        const saveUrl = '@Url.Action("SaveOfflineResults", "Imtihon")';
+
+        if (!modal || !openBtn || !groupSelect || !examSelect || !studentsContainer || !saveBtn) {
+            return;
+        }
+
+        const toggleModal = (show) => {
+            if (show) {
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            } else {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        };
+
+        const resetModal = () => {
+            groupSelect.value = '';
+            examSelect.innerHTML = '<option value="">Avval guruhni tanlang</option>';
+            examSelect.disabled = true;
+            studentsContainer.innerHTML = '';
+            studentsContainer.classList.add('hidden');
+            saveBtn.disabled = true;
+            setMessage('', null);
+            setExamInfo(null);
+        };
+
+        const setMessage = (text, type) => {
+            if (!messageBox) return;
+            if (!text) {
+                messageBox.classList.add('hidden');
+                messageBox.textContent = '';
+                messageBox.classList.remove('bg-red-50', 'text-red-700', 'bg-green-50', 'text-green-700');
+                return;
+            }
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden', 'bg-red-50', 'text-red-700', 'bg-green-50', 'text-green-700');
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-50', 'text-red-700');
+            } else {
+                messageBox.classList.add('bg-green-50', 'text-green-700');
+            }
+        };
+
+        const setExamInfo = (info) => {
+            if (!examInfo) return;
+            if (!info) {
+                examInfo.classList.add('hidden');
+                infoFields?.forEach(el => el.textContent = '-');
+                return;
+            }
+            examInfo.classList.remove('hidden');
+            examInfo.querySelector('[data-field="group"]').textContent = info.guruh ?? '-';
+            examInfo.querySelector('[data-field="date"]').textContent = info.sana
+                ? new Date(info.sana).toLocaleDateString()
+                : '-';
+            examInfo.querySelector('[data-field="questions"]').textContent = info.jamiSavollar ?? '-';
+            examInfo.querySelector('[data-field="max-ball"]').textContent = info.maksimalBall ?? '-';
+            examInfo.querySelector('[data-field="min-percent"]').textContent = info.minimalBall ? `${info.minimalBall}%` : '-';
+        };
+
+        const renderStudents = (students) => {
+            studentsContainer.innerHTML = '';
+            students.forEach(student => {
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-1 md:grid-cols-12 gap-3 border border-gray-200 rounded-xl px-4 py-3';
+                row.dataset.talabaId = student.talabaId;
+                row.innerHTML = `
+                    <div class="md:col-span-5">
+                        <p class="font-semibold text-gray-800">${student.fio}</p>
+                        <p class="text-xs text-gray-500">${student.telefon ?? ''}</p>
+                        ${student.status ? `<p class="text-xs mt-1 ${student.status === "O'tdi" ? 'text-green-600' : 'text-red-600'}">Oldingi: ${student.status}</p>` : ''}
+                    </div>
+                    <div class="md:col-span-3 space-y-1">
+                        <label class="block text-xs font-medium text-gray-600">To'g'ri javoblar</label>
+                        <input type="number"
+                               class="offline-correct-input w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500"
+                               min="0"
+                               value="${student.togri ?? ''}">
+                    </div>
+                    <div class="md:col-span-4 space-y-1">
+                        <label class="block text-xs font-medium text-gray-600">Ball *</label>
+                        <input type="number"
+                               class="offline-ball-input w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500"
+                               min="0"
+                               value="${student.ball ?? ''}"
+                               required>
+                    </div>
+                `;
+                studentsContainer.appendChild(row);
+            });
+
+            studentsContainer.classList.toggle('hidden', students.length === 0);
+            saveBtn.disabled = students.length === 0;
+        };
+
+        const fetchExams = async (guruhId) => {
+            setMessage('', null);
+            examSelect.innerHTML = '<option value="">Imtihon tanlang</option>';
+            examSelect.disabled = true;
+            setExamInfo(null);
+            studentsContainer.innerHTML = '';
+            studentsContainer.classList.add('hidden');
+            saveBtn.disabled = true;
+
+            if (!guruhId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${examsUrl}?guruhId=${guruhId}`);
+                const data = await response.json();
+                if (data.success && data.exams.length) {
+                    data.exams.forEach(exam => {
+                        const option = document.createElement('option');
+                        option.value = exam.id;
+                        option.textContent = `${exam.nomi} (${new Date(exam.sana).toLocaleDateString()})`;
+                        examSelect.appendChild(option);
+                    });
+                    examSelect.disabled = false;
+                } else {
+                    setMessage(data.message || 'Bu guruh uchun offline imtihon topilmadi.', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                setMessage('Imtihonlar roʻyxatini yuklab bo‘lmadi.', 'error');
+            }
+        };
+
+        const fetchStudents = async (imtihonId) => {
+            setMessage('', null);
+            studentsContainer.innerHTML = '';
+            studentsContainer.classList.add('hidden');
+            saveBtn.disabled = true;
+            setExamInfo(null);
+
+            if (!imtihonId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${studentsUrl}?imtihonId=${imtihonId}`);
+                const data = await response.json();
+                if (data.success) {
+                    setExamInfo({
+                        guruh: data.exam.guruh,
+                        sana: data.exam.sana,
+                        jamiSavollar: data.exam.jamiSavollar,
+                        maksimalBall: data.exam.maksimalBall,
+                        minimalBall: data.exam.minimalBall
+                    });
+                    renderStudents(data.students || []);
+                    if (!data.students?.length) {
+                        setMessage('Talabalar ro‘yxati topilmadi.', 'error');
+                    }
+                } else {
+                    setMessage(data.message || 'Talabalar roʻyxatini yuklab bo‘lmadi.', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                setMessage('Talabalar roʻyxatini yuklab bo‘lmadi.', 'error');
+            }
+        };
+
+        const collectPayload = () => {
+            const imtihonId = Number(examSelect.value);
+            if (!imtihonId) {
+                setMessage('Avval imtihonni tanlang.', 'error');
+                return null;
+            }
+
+            const rows = studentsContainer.querySelectorAll('[data-talaba-id]');
+            const students = Array.from(rows).map(row => {
+                const talabaId = Number(row.dataset.talabaId);
+                const correctInput = row.querySelector('.offline-correct-input');
+                const ballInput = row.querySelector('.offline-ball-input');
+                const ball = ballInput?.value ? Number(ballInput.value) : null;
+                const togri = correctInput?.value ? Number(correctInput.value) : null;
+                return { talabaId, ball, togri };
+            }).filter(item => item.ball !== null && !Number.isNaN(item.ball));
+
+            if (!students.length) {
+                setMessage('Hech bo‘lmasa bitta talaba uchun ball kiriting.', 'error');
+                return null;
+            }
+
+            return {
+                imtihonId,
+                students: students.map(s => ({
+                    talabaId: s.talabaId,
+                    ball: Math.max(0, Math.trunc(s.ball ?? 0)),
+                    togriJavoblar: s.togri !== null ? Math.max(0, Math.trunc(s.togri)) : null
+                }))
+            };
+        };
+
+        openBtn.addEventListener('click', () => {
+            resetModal();
+            toggleModal(true);
+        });
+
+        const closeModal = () => {
+            toggleModal(false);
+        };
+
+        closeBtn?.addEventListener('click', closeModal);
+        cancelBtn?.addEventListener('click', closeModal);
+        backdrop?.addEventListener('click', closeModal);
+
+        groupSelect.addEventListener('change', (e) => {
+            fetchExams(e.target.value);
+        });
+
+        examSelect.addEventListener('change', (e) => {
+            fetchStudents(e.target.value);
+        });
+
+        saveBtn.addEventListener('click', async () => {
+            const payload = collectPayload();
+            if (!payload) {
+                return;
+            }
+
+            setMessage('Natijalar saqlanmoqda...', null);
+            saveBtn.disabled = true;
+
+            try {
+                const response = await fetch(saveUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    setMessage(data.message || 'Natijalar saqlandi.', 'success');
+                    await fetchStudents(payload.imtihonId);
+                } else {
+                    setMessage(data.message || 'Natijalarni saqlashda xatolik.', 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                setMessage('Server bilan bog‘lanishda xatolik sodir bo‘ldi.', 'error');
+            } finally {
+                saveBtn.disabled = false;
+            }
+        });
+    });
+</script>
+

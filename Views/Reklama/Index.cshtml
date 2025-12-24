@@ -1,0 +1,76 @@
+@model IEnumerable<talim_platforma.Models.Advertisement>
+@{
+    ViewData["Title"] = "Reklamalar";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <p class="text-uppercase text-muted small mb-1">Kontent</p>
+            <h2 class="mb-0 admin-page-title">Reklamalar</h2>
+            <span class="text-muted small">Asosiy / O‘qituvchi / Talaba sahifalarida bannerlar</span>
+        </div>
+        <a class="btn btn-primary" asp-action="Create"><i class="fa fa-plus me-1"></i> Yangi reklama</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success shadow-sm border-0">@TempData["SuccessMessage"]</div>
+    }
+
+    <div class="card border-0 shadow-sm admin-card p-3">
+        <div class="row g-4">
+            @foreach (var ad in Model)
+            {
+                <div class="col-xxl-3 col-xl-4 col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm overflow-hidden">
+                        <div class="ratio ratio-16x9 bg-light position-relative d-flex align-items-center justify-content-center">
+                            @if (!string.IsNullOrWhiteSpace(ad.ImagePath))
+                            {
+                                <img src="@ad.ImagePath" class="w-100 h-100 object-fit-cover" alt="@ad.Title" />
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Rasm yuklanmagan</span>
+                            }
+                            <span class="badge bg-white text-primary position-absolute m-2 px-3 py-2 shadow-sm text-capitalize">@ad.Target</span>
+                        </div>
+                        <div class="card-body d-flex flex-column gap-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h5 class="card-title mb-0 text-truncate">@ad.Title</h5>
+                                <span class="badge @(ad.IsActive ? "bg-success" : "bg-secondary")">
+                                    @(ad.IsActive ? "Faol" : "O'chirilgan")
+                                </span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(ad.Description))
+                            {
+                                <p class="text-muted small mb-0">@ad.Description</p>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(ad.LinkUrl))
+                            {
+                                <a href="@ad.LinkUrl" target="_blank" class="small">Havola →</a>
+                            }
+                            <div class="mt-auto pt-2 d-flex flex-wrap gap-2">
+                                <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@ad.Id"><i class="fa fa-pen me-1"></i>Tahrirlash</a>
+                                <form asp-action="Toggle" asp-route-id="@ad.Id" method="post">
+                                    <button class="btn btn-sm @(ad.IsActive ? "btn-outline-warning" : "btn-outline-success")" type="submit">
+                                        @(ad.IsActive ? "O'chirish" : "Faollashtirish")
+                                    </button>
+                                </form>
+                                <form asp-action="Delete" asp-route-id="@ad.Id" method="post" onsubmit="return confirm('O‘chirishni tasdiqlaysizmi?');">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit"><i class="fa fa-trash me-1"></i>O‘chirish</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info border-0 shadow-sm mt-3">Hozircha reklama yo‘q. "Yangi reklama" tugmasi orqali qo‘shing.</div>
+    }
+</div>

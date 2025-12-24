@@ -1,0 +1,139 @@
+@model IEnumerable<talim_platforma.Models.TalabaKurs>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Talaba – Kurs birikmalari";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">Talaba – Kurs birikmalari</h2>
+        <p class="text-muted small mb-0">Talabalarni kurslarga biriktirish ro‘yxati</p>
+    </div>
+
+    <a asp-action="Yaratish" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Yangi biriktirish
+    </a>
+</div>
+
+@if (TempData["xabar"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["xabar"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="table-responsive mt-3">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Talaba</th>
+                <th>Kurs</th>
+                <th>Holati</th>
+                <th>Qo‘shilgan sana</th>
+                <th class="text-end">Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                var index = 1;
+
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@index</td>
+                        <td class="fw-semibold">
+                            @item.Talaba?.Ism @item.Talaba?.Familiya
+                        </td>
+                        <td>@item.Kurs?.Nomi</td>
+
+                        <td>
+                            <span class="badge bg-secondary">@item.Holati</span>
+                        </td>
+
+                        <td>@item.QoshilganSana.ToString("dd.MM.yyyy")</td>
+
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Tahrirlash" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger delete-link-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal"
+                                    data-id="@item.Id"
+                                    data-name="@item.Talaba?.Ism @item.Talaba?.Familiya - @item.Kurs?.Nomi">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    index++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        Hozircha birikmalar mavjud emas.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<!-- O‘chirish modal oynasi -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Biriktirishni o‘chirish</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p>Quyidagi biriktirishni o‘chirmoqchimisiz?</p>
+                <p class="fw-semibold" id="deleteItemName"></p>
+
+                <div class="alert alert-warning small mb-0">
+                    Bu amal qaytarilmaydi.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" asp-action="Ochirish">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteItemId" />
+
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-danger">Ha, o‘chirish</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("deleteModal");
+
+            modal.addEventListener("show.bs.modal", function (event) {
+                const button = event.relatedTarget;
+
+                const id = button.getAttribute("data-id");
+                const name = button.getAttribute("data-name");
+
+                document.getElementById("deleteItemId").value = id;
+                document.getElementById("deleteItemName").textContent = name;
+            });
+        });
+    </script>
+}

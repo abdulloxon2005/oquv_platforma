@@ -1,0 +1,61 @@
+@model List<talim_platforma.Models.Tolov>
+@{
+    Layout = "~/Views/Shared/_TalabaLayout.cshtml";
+    ViewData["Title"] = "To'lovlar tarixi";
+    var qarzdorlik = (decimal)(ViewBag.Qarzdorlik ?? 0m);
+    var haqdorlik = (decimal)(ViewBag.Haqdorlik ?? 0m);
+}
+
+<div class="max-w-6xl mx-auto space-y-5">
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">To'lovlar tarixi</h1>
+            <p class="text-sm text-gray-500">So‘nggi barcha to‘lovlar va statuslar</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <span class="px-3 py-2 rounded-xl bg-red-50 text-red-700 text-sm font-semibold">Qarzdorlik: @qarzdorlik.ToString("N0")</span>
+            <span class="px-3 py-2 rounded-xl bg-green-50 text-green-700 text-sm font-semibold">Haqdorlik: @haqdorlik.ToString("N0")</span>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="rounded-2xl bg-blue-50 border border-blue-100 px-5 py-6 text-sm text-blue-800">
+            Hozircha to‘lovlar mavjud emas.
+        </div>
+    }
+    else
+    {
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var t in Model)
+            {
+                var statusClass = t.Qarzdorlik > 0
+                    ? "bg-red-100 text-red-700"
+                    : (t.Haqdorlik > 0 ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700");
+                var statusText = t.Qarzdorlik > 0
+                    ? "Qarzdor"
+                    : (t.Haqdorlik > 0 ? "Haqdor" : "To‘liq to‘langan");
+                <div class="border border-gray-200 rounded-2xl p-4 shadow-sm bg-white space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-500">@t.Kurs?.Nomi</div>
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold @statusClass">@statusText</span>
+                    </div>
+                    <div class="text-lg font-semibold text-gray-800">@t.Miqdor.ToString("N0")</div>
+                    <div class="text-xs text-gray-500">@t.Sana.ToString("dd MMM, yyyy HH:mm") · @t.TolovUsuli</div>
+                    <div class="text-sm text-gray-600">
+                        <p>Holat: @(!string.IsNullOrWhiteSpace(t.Holat) ? t.Holat : "Hisoblanmoqda")</p>
+                        <p>Qarzdorlik: @t.Qarzdorlik.ToString("N0")</p>
+                        <p>Haqdorlik: @t.Haqdorlik.ToString("N0")</p>
+                        <p>Chek: @(!string.IsNullOrWhiteSpace(t.ChekRaqami) ? t.ChekRaqami : "-")</p>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span>ID: @t.Id</span>
+                        <a asp-controller="Tolov" asp-action="Chek" asp-route-id="@t.Id" class="text-blue-600 hover:text-blue-700 font-semibold">Chek</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+

@@ -1,0 +1,34 @@
+@model IEnumerable<talim_platforma.Models.Tolov>
+
+<div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Qarzdor talabalar</h4>
+        <a class="btn btn-sm btn-outline-danger" href="/Hisobot/YuklabOlish?turi=qarzdor">PDF yuklab olish</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Talaba</th>
+                    <th>Kurs</th>
+                    <th>Qarzdorlik</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td>@t.Talaba.Ism</td>
+                        <td>@t.Kurs.Nomi</td>
+                        <td>@t.Qarzdorlik.ToString("N0") so‘m</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-end fw-semibold">
+        Jami qarzdorlik: @ViewBag.Jami so‘m
+    </div>
+</div>

@@ -1,0 +1,26 @@
+@model talim_platforma.Models.Tolov
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "To'lov cheki";
+}
+
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">To'lov cheki</h3>
+        <span class="badge bg-primary">Talim Plus</span>
+    </div>
+    <div class="card-body">
+        <p><strong>F.I.Sh:</strong> @Model.Talaba.Familiya @Model.Talaba.Ism</p>
+        <p><strong>Telefon:</strong> @Model.Talaba.TelefonRaqam</p>
+        <p><strong>Kurs:</strong> @Model.Kurs.Nomi</p>
+        <p><strong>Summa:</strong> @Model.Miqdor.ToString("N0") so'm</p>
+        <p><strong>Usuli:</strong> @Model.TolovUsuli</p>
+        <p><strong>Sana:</strong> @Model.Sana.ToString("dd.MM.yyyy HH:mm")</p>
+        <p><strong>Holat:</strong> @Model.Holat</p>
+        <p><strong>Chek raqami:</strong> @Model.ChekRaqami</p>
+    </div>
+    <div class="card-footer d-flex justify-content-end gap-2">
+        <a asp-action="ChekYuklabOlish" asp-route-id="@Model.Id" class="btn btn-outline-success">📥 PDF yuklab olish</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">🔙 To'lovlar ro'yxati</a>
+    </div>
+</div>

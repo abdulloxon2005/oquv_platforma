@@ -1,0 +1,227 @@
+@model talim_platforma.Models.ViewModels.GuruhTalabalarViewModel
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Guruh talabalari";
+    var antiForgeryToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">@Model.GuruhNomi guruhidagi talabalar</h2>
+        <p class="text-muted mb-0">@Model.KursNomi kursi</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Guruhlar" class="btn btn-outline-secondary">⬅️ Ortga</a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal" data-guruh-id="@Model.GuruhId">
+            ➕ Talaba qo‘shish
+        </button>
+    </div>
+</div>
+
+    <div class="table-responsive shadow-sm">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Talaba</th>
+                    <th>Telefon</th>
+                    <th>Oxirgi holati</th>
+                    <th>Faollik</th>
+                    <th class="text-center">Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Talabalar.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Hali talaba biriktirilmagan.</td>
+                    </tr>
+                }
+                else
+                {
+                    var index = 1;
+                    foreach (var talaba in Model.Talabalar.OrderBy(t => t.Faolmi ? 0 : 1).ThenBy(t => t.Familiya))
+                    {
+                        var rowClass = talaba.Faolmi ? string.Empty : "inactive-row";
+                        <tr class="@rowClass" data-talaba-id="@talaba.TalabaId">
+                            <td>@index</td>
+                            <td>
+                                <strong>@talaba.Ism @talaba.Familiya</strong>
+                            </td>
+                            <td>@talaba.Telefon</td>
+                            <td>
+                                @if (talaba.OxirgiHolat == null)
+                                {
+                                    <span class="text-muted">Ma'lumot yo‘q</span>
+                                }
+                                else
+                                {
+                                    <span>@talaba.OxirgiHolat (@talaba.OxirgiSana?.ToString("dd.MM.yyyy"))</span>
+                                }
+                            </td>
+                            <td>
+                                @if (talaba.Faolmi)
+                                {
+                                    <span class="badge bg-success">Faol</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Faol emas</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button class="btn btn-sm btn-outline-secondary sabab-btn"
+                                            data-davomat-id="@talaba.DavomatIdSababUchun"
+                                            data-talaba="@talaba.TalabaId"
+                                            data-guruh="@Model.GuruhId"
+                                            @(talaba.SababKiritishMumkin ? "" : "disabled")>
+                                        Sabab qo‘yish
+                                    </button>
+                                    <form asp-action="RemoveStudentFromGroup" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="talabaId" value="@talaba.TalabaId" />
+                                        <input type="hidden" name="guruhId" value="@Model.GuruhId" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Olib tashlash</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Sabab modal -->
+<div class="modal fade" id="sababModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sabab qo‘yish</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sababForm">
+                    <input type="hidden" id="modalDavomatId" />
+                    <div class="mb-3">
+                        <label for="sababMatni" class="form-label">Sabab</label>
+                        <textarea class="form-control" id="sababMatni" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Saqlash</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Talaba qo‘shish modal (reuse) -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Talaba qo‘shish</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="studentSearchInput" class="form-control mb-2" placeholder="Ism yoki login bo‘yicha qidirish...">
+                <div id="studentSearchResults"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let currentGroupId = @Model.GuruhId;
+    const antiForgeryToken = '@antiForgeryToken';
+    const sababModalEl = document.getElementById('sababModal');
+    const sababModal = new bootstrap.Modal(sababModalEl);
+
+    document.querySelectorAll('.sabab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const davomatId = this.getAttribute('data-davomat-id');
+            if (!davomatId) return;
+            document.getElementById('modalDavomatId').value = davomatId;
+            document.getElementById('sababMatni').value = '';
+            sababModal.show();
+        });
+    });
+
+    document.getElementById('sababForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const davomatId = document.getElementById('modalDavomatId').value;
+        const sabab = document.getElementById('sababMatni').value;
+
+        fetch('/Davomat/AddReason', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': antiForgeryToken
+            },
+            body: JSON.stringify({ davomatId, sabab })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Xatolik');
+            return res.json();
+        })
+        .then(result => {
+            sababModal.hide();
+            location.reload();
+        })
+        .catch(() => alert('Sabab saqlashda xatolik yuz berdi.'));
+    });
+
+    const addStudentModal = document.getElementById('addStudentModal');
+    addStudentModal.addEventListener('show.bs.modal', function () {
+        document.getElementById('studentSearchInput').value = '';
+        document.getElementById('studentSearchResults').innerHTML = '';
+    });
+
+    document.getElementById('studentSearchInput').addEventListener('input', function () {
+        const query = this.value;
+        if (query.length < 2) {
+            document.getElementById('studentSearchResults').innerHTML = '';
+            return;
+        }
+
+        fetch(`/Guruh/SearchStudent?query=${encodeURIComponent(query)}&guruhId=${currentGroupId}`)
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('studentSearchResults').innerHTML = html;
+            });
+    });
+
+    function addStudent(studentId) {
+        fetch('/Guruh/AddStudentToGroup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': antiForgeryToken
+            },
+            body: JSON.stringify({ talabaId: studentId, guruhId: currentGroupId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Xatolik');
+            }
+        });
+    }
+
+    window.addStudent = addStudent;
+</script>
+}
+
+<style>
+    .inactive-row {
+        background-color: #f0f0f0;
+    }
+</style>
+

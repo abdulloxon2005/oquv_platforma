@@ -1,0 +1,80 @@
+@model talim_platforma.Models.Guruh
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Guruhni tahrirlash";
+}
+
+<h2 class="mb-3">Guruhni tahrirlash</h2>
+<form asp-action="GuruhTahrirlash" method="post" class="border p-4 rounded shadow-sm bg-light">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Nomi" class="form-label">Guruh nomi</label>
+                <input asp-for="Nomi" class="form-control" />
+                <span asp-validation-for="Nomi" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="BoshlanishSanasi" class="form-label">Boshlanish sanasi</label>
+                <input asp-for="BoshlanishSanasi" type="date" class="form-control" />
+                <span asp-validation-for="BoshlanishSanasi" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="DarsKunlari" class="form-label">Dars kunlari</label>
+                <select asp-for="DarsKunlari" class="form-select" asp-items="ViewBag.DarsKunlari">
+                    <option value="">-- Kunlarni tanlang --</option>
+                </select>
+                <span asp-validation-for="DarsKunlari" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="DarsVaqti" class="form-label">Dars vaqti</label>
+                <input asp-for="DarsVaqti" type="time" class="form-control" />
+                <span asp-validation-for="DarsVaqti" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="Xona" class="form-label">Xona raqami</label>
+                <input asp-for="Xona" class="form-control" />
+                <span asp-validation-for="Xona" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="Holati" class="form-label">Holati</label>
+                <select asp-for="Holati" class="form-select">
+                    <option value="Faol">Faol</option>
+                    <option value="Tugallangan">Tugallangan</option>
+                </select>
+                <span asp-validation-for="Holati" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="KursId" class="form-label">Kurs</label>
+                <select asp-for="KursId" class="form-select" asp-items="ViewBag.Kurslar">
+                    <option value="">-- Kursni tanlang --</option>
+                </select>
+                <span asp-validation-for="KursId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="OqituvchiId" class="form-label">O‘qituvchi</label>
+                <select asp-for="OqituvchiId" class="form-select" asp-items="ViewBag.Oqituvchilar">
+                    <option value="">-- O‘qituvchini tanlang --</option>
+                </select>
+                <span asp-validation-for="OqituvchiId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary px-4">💾 Yangilash</button>
+            <a asp-action="Guruhlar" class="btn btn-outline-secondary px-4 ms-2">⬅️ Bekor qilish</a>
+        </div>
+    </form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

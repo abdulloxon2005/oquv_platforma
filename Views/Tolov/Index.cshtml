@@ -1,0 +1,82 @@
+@model List<talim_platforma.Models.Tolov>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Barcha to‘lovlar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">💳 Barcha to‘lovlar</h2>
+        <p class="text-muted small mb-0">Talabalar tomonidan amalga oshirilgan so‘nggi to‘lovlar</p>
+    </div>
+    <a href="@Url.Action("Qoshish", "Tolov")" class="btn btn-primary">+ Yangi To‘lov</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="table-responsive shadow-sm">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Talaba</th>
+                <th>Kurs</th>
+                <th>Miqdor</th>
+                <th>To‘lov usuli</th>
+                <th>Sana</th>
+                <th>Holat</th>
+                <th>Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                int i = 1;
+                foreach (var t in Model)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@t.Talaba?.Familiya @t.Talaba?.Ism</td>
+                        <td>@t.Kurs?.Nomi</td>
+                        <td>@t.Miqdor.ToString("N0")</td>
+                        <td><span class="badge bg-secondary">@t.TolovUsuli</span></td>
+                        <td>@t.Sana.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>
+                            @if (t.Qarzdorlik > 0)
+                            {
+                                <span class="badge bg-danger">Qarzdor: @t.Qarzdorlik.ToString("N0")</span>
+                            }
+                            else if (t.Haqdorlik > 0)
+                            {
+                                <span class="badge bg-success">Haqdor: @t.Haqdorlik.ToString("N0")</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary">To‘liq to‘langan</span>
+                            }
+                        </td>
+                        <td class="text-nowrap">
+                            <a href="@Url.Action("Tarix", "Tolov", new { id = t.TalabaId })" class="btn btn-sm btn-outline-info">Tarix</a>
+                            <a href="@Url.Action("Malumot", "Tolov", new { id = t.TalabaId })" class="btn btn-sm btn-outline-warning">To‘liq</a>
+                        </td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">Hozircha to‘lovlar mavjud emas</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

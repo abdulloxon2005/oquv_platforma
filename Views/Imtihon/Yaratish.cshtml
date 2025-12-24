@@ -1,0 +1,140 @@
+@model talim_platforma.Models.ViewModels.ImtihonCreateViewModel
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    ViewData["Title"] = "Yangi imtihon";
+}
+
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-200 bg-blue-500 text-white rounded-t-lg">
+            <h4 class="font-semibold flex items-center gap-2">
+                <span>➕</span>
+                <span>Yangi imtihon yaratish</span>
+            </h4>
+        </div>
+        <div class="px-5 py-5 space-y-4">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <form asp-action="Yaratish" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+
+                <div>
+                    <label asp-for="GuruhId" class="block text-sm font-medium text-gray-700 mb-1">Guruh *</label>
+                    <select asp-for="GuruhId" asp-items="Model.Guruhlar"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Guruhni tanlang</option>
+                    </select>
+                    <span asp-validation-for="GuruhId" class="text-xs text-red-600"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Nomi" class="block text-sm font-medium text-gray-700 mb-1">Imtihon nomi *</label>
+                    <input asp-for="Nomi"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Masalan: 1-chorak imtihoni" />
+                    <span asp-validation-for="Nomi" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="ImtihonTuri" class="block text-sm font-medium text-gray-700 mb-1">Imtihon turi *</label>
+                        <select asp-for="ImtihonTuri" asp-items="Model.ImtihonTurlari"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Tanlang</option>
+                        </select>
+                        <span asp-validation-for="ImtihonTuri" class="text-xs text-red-600"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="ImtihonFormati" class="block text-sm font-medium text-gray-700 mb-1">Imtihon formati *</label>
+                        <select asp-for="ImtihonFormati" asp-items="Model.ImtihonFormatlari"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </select>
+                        <span asp-validation-for="ImtihonFormati" class="text-xs text-red-600"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Sana" class="block text-sm font-medium text-gray-700 mb-1">Sana *</label>
+                        <input asp-for="Sana" type="date"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span asp-validation-for="Sana" class="text-xs text-red-600"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="MuddatDaqiqada" class="block text-sm font-medium text-gray-700 mb-1">Muddat (daqiqa)</label>
+                        <input asp-for="MuddatDaqiqada" type="number" min="1" max="1000"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Masalan: 60" />
+                        <span asp-validation-for="MuddatDaqiqada" class="text-xs text-red-600"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="BoshlanishVaqti" class="block text-sm font-medium text-gray-700 mb-1">Boshlanish vaqti</label>
+                        <input asp-for="BoshlanishVaqti" type="time"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span asp-validation-for="BoshlanishVaqti" class="text-xs text-red-600"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="TugashVaqti" class="block text-sm font-medium text-gray-700 mb-1">Tugash vaqti</label>
+                        <input asp-for="TugashVaqti" type="time"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span asp-validation-for="TugashVaqti" class="text-xs text-red-600"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="MinimalBall" class="block text-sm font-medium text-gray-700 mb-1">Minimal ball (%) *</label>
+                        <input asp-for="MinimalBall" type="number" min="0" max="100" value="60"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <small class="block text-xs text-gray-500 mt-1">Sertifikat berish uchun minimal foiz</small>
+                        <span asp-validation-for="MinimalBall" class="text-xs text-red-600"></span>
+                    </div>
+
+                    <div class="flex items-end">
+                        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                            <input asp-for="SertifikatBeriladimi" type="checkbox"
+                                   class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                            <span>Sertifikat beriladimi?</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="Izoh" class="block text-sm font-medium text-gray-700 mb-1">Izoh</label>
+                    <textarea asp-for="Izoh" rows="3"
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Qo'shimcha ma'lumotlar..."></textarea>
+                    <span asp-validation-for="Izoh" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <a asp-action="Index"
+                       class="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+                        ❌ Bekor qilish
+                    </a>
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors">
+                        ✅ Saqlash
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

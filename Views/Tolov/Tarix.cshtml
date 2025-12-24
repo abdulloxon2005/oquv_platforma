@@ -1,0 +1,120 @@
+@model List<talim_platforma.Models.Tolov>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "To‘lov tarixi";
+}
+
+<h2 class="mb-4">@Model.FirstOrDefault()?.Talaba?.Ism @Model.FirstOrDefault()?.Talaba?.Familiya - To‘lov tarixi</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="table-responsive shadow-sm">
+    <table class="table align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Sana</th>
+                <th>Miqdor (so‘m)</th>
+                <th>To‘lov usuli</th>
+                <th>Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                int i = 1;
+                foreach (var t in Model)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@t.Sana.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@t.Miqdor.ToString("N0")</td>
+                        <td><span class="badge bg-secondary">@t.TolovUsuli</span></td>
+                        <td>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger ochirish-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#ochirishModal"
+                                    data-id="@t.Id"
+                                    data-sana="@t.Sana.ToString("dd.MM.yyyy HH:mm")"
+                                    data-miqdor="@t.Miqdor.ToString("N0")"
+                                    data-usul="@t.TolovUsuli">
+                                🗑️ O‘chirish
+                            </button>
+                        </td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-3">
+                        Bu talabaga oid to‘lovlar topilmadi
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- 🔽 O‘chirish uchun modal oynasi -->
+<div class="modal fade" id="ochirishModal" tabindex="-1" aria-labelledby="ochirishModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="ochirishModalLabel">To‘lovni o‘chirish</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
+      </div>
+      <div class="modal-body">
+        <p>Haqiqatan ham ushbu to‘lovni o‘chirmoqchimisiz?</p>
+        <ul class="list-unstyled">
+            <li><strong>Sana:</strong> <span id="modalSana"></span></li>
+            <li><strong>Miqdor:</strong> <span id="modalMiqdor"></span> so‘m</li>
+            <li><strong>To‘lov usuli:</strong> <span id="modalUsul"></span></li>
+        </ul>
+        <div class="alert alert-warning mt-3">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Bu amal qaytarilmaydi! To‘lov ma’lumotlari butunlay o‘chiriladi.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <form asp-action="Ochir" method="post">
+          @Html.AntiForgeryToken()
+          <input type="hidden" id="modalTolovId" name="id" />
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+          <button type="submit" class="btn btn-danger">O‘chirish</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ochirishBtns = document.querySelectorAll(".ochirish-btn");
+            ochirishBtns.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const id = this.dataset.id;
+                    const sana = this.dataset.sana;
+                    const miqdor = this.dataset.miqdor;
+                    const usul = this.dataset.usul;
+
+                    document.getElementById("modalTolovId").value = id;
+                    document.getElementById("modalSana").innerText = sana;
+                    document.getElementById("modalMiqdor").innerText = miqdor;
+                    document.getElementById("modalUsul").innerText = usul;
+                });
+            });
+        });
+    </script>
+}

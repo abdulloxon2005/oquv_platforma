@@ -1,0 +1,36 @@
+@model talim_platforma.Models.Tolov
+
+<div class="modal-header bg-danger text-white">
+    <h5 class="modal-title">To‘lovni o‘chirish</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
+</div>
+
+<div class="modal-body">
+    <p>Haqiqatan ham ushbu to‘lovni o‘chirmoqchimisiz?</p>
+
+    <ul class="list-unstyled">
+        <li>
+            <strong>Talaba:</strong>
+            @(Model.Talaba != null 
+                ? $"{Model.Talaba.Familiya} {Model.Talaba.Ism}" 
+                : $"ID: {Model.TalabaId}")
+        </li>
+        <li><strong>Kurs:</strong> @(Model.Kurs != null ? Model.Kurs.Nomi : "-")</li>
+        <li><strong>Summasi:</strong> @Model.Miqdor.ToString("N0") so‘m</li>
+        <li><strong>Sana:</strong> @Model.Sana.ToString("dd.MM.yyyy HH:mm")</li>
+    </ul>
+
+    <div class="alert alert-warning mt-3">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Bu amal qaytarilmaydi! To‘lov ma’lumotlari butunlay o‘chiriladi.
+    </div>
+</div>
+
+<div class="modal-footer">
+    <form asp-action="Ochir" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+        <button type="submit" class="btn btn-danger">O‘chirish</button>
+    </form>
+</div>

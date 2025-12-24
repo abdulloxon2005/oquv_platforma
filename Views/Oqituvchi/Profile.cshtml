@@ -1,0 +1,263 @@
+@model talim_platforma.Models.Foydalanuvchi
+@{
+    ViewData["Title"] = "Profil";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    var oqituvchi = ViewBag.Oqituvchi as talim_platforma.Models.Foydalanuvchi ?? Model;
+}
+
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Sarlavha -->
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">👤 Profil sozlamalari</h1>
+        <p class="text-gray-500 text-sm">Shaxsiy ma'lumotlaringizni va parolingizni yangilang</p>
+    </div>
+
+    <!-- Xabarlar -->
+    @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage as string))
+    {
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+            <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <p class="text-green-800 text-sm font-medium">@ViewBag.SuccessMessage</p>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+    {
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+            <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            <p class="text-red-800 text-sm font-medium">@ViewBag.ErrorMessage</p>
+        </div>
+    }
+
+    <form method="post" asp-action="Profile" class="space-y-6">
+        @Html.AntiForgeryToken()
+
+        <!-- Shaxsiy ma'lumotlar -->
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-5">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Shaxsiy ma'lumotlar
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Asosiy shaxsiy ma'lumotlaringiz</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Ism -->
+                <div>
+                    <label for="ism" class="block text-sm font-medium text-gray-700 mb-2">
+                        Ism <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="ism" 
+                           name="ism" 
+                           value="@oqituvchi.Ism" 
+                           required
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-800"
+                           placeholder="Ismingizni kiriting">
+                </div>
+
+                <!-- Familiya -->
+                <div>
+                    <label for="familiya" class="block text-sm font-medium text-gray-700 mb-2">
+                        Familiya <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="familiya" 
+                           name="familiya" 
+                           value="@oqituvchi.Familiya" 
+                           required
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-800"
+                           placeholder="Familiyangizni kiriting">
+                </div>
+
+                <!-- Otasining ismi -->
+                <div>
+                    <label for="otasiningIsmi" class="block text-sm font-medium text-gray-700 mb-2">
+                        Otasining ismi
+                    </label>
+                    <input type="text" 
+                           id="otasiningIsmi" 
+                           name="otasiningIsmi" 
+                           value="@(oqituvchi.OtasiningIsmi ?? "")" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-800"
+                           placeholder="Otasining ismini kiriting">
+                </div>
+
+                <!-- Telefon raqami -->
+                <div>
+                    <label for="telefonRaqam" class="block text-sm font-medium text-gray-700 mb-2">
+                        Telefon raqami <span class="text-red-500">*</span>
+                    </label>
+                    <input type="tel" 
+                           id="telefonRaqam" 
+                           name="telefonRaqam" 
+                           value="@oqituvchi.TelefonRaqam" 
+                           required
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-800"
+                           placeholder="+998901234567">
+                </div>
+            </div>
+
+            <!-- Login (faqat ko'rsatish) -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Login
+                </label>
+                <input type="text" 
+                       value="@oqituvchi.Login" 
+                       disabled
+                       class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed">
+                <p class="text-xs text-gray-400 mt-1">Login o'zgartirib bo'lmaydi</p>
+            </div>
+        </div>
+
+        <!-- Parol o'zgartirish -->
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-5">
+            <div class="border-b border-gray-200 pb-4">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Parolni o'zgartirish
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Parolingizni xavfsizroq qilish uchun yangilang</p>
+            </div>
+
+            <div class="space-y-5">
+                <!-- Eski parol -->
+                <div>
+                    <label for="eskiParol" class="block text-sm font-medium text-gray-700 mb-2">
+                        Joriy parol
+                    </label>
+                    <input type="password" 
+                           id="eskiParol" 
+                           name="eskiParol" 
+                           autocomplete="current-password"
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-800"
+                           placeholder="Joriy parolingizni kiriting">
+                    <p class="text-xs text-gray-400 mt-1">Parolni o'zgartirish uchun joriy parolni kiriting</p>
+                </div>
+
+                <!-- Yangi parol -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="yangiParol" class="block text-sm font-medium text-gray-700 mb-2">
+                            Yangi parol
+                        </label>
+                        <input type="password" 
+                               id="yangiParol" 
+                               name="yangiParol" 
+                               autocomplete="new-password"
+                               minlength="6"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-800"
+                               placeholder="Yangi parol (min 6 belgi)">
+                    </div>
+
+                    <!-- Yangi parol tasdiq -->
+                    <div>
+                        <label for="yangiParolTasdiq" class="block text-sm font-medium text-gray-700 mb-2">
+                            Yangi parol (qayta)
+                        </label>
+                        <input type="password" 
+                               id="yangiParolTasdiq" 
+                               name="yangiParolTasdiq" 
+                               autocomplete="new-password"
+                               minlength="6"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-gray-800"
+                               placeholder="Yangi parolni qayta kiriting">
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        <div class="text-sm text-blue-800">
+                            <p class="font-medium mb-1">Parol talablari:</p>
+                            <ul class="list-disc list-inside space-y-0.5 text-blue-700">
+                                <li>Kamida 6 ta belgi</li>
+                                <li>Agar parol o'zgartirmoqchi bo'lsangiz, barcha maydonlarni to'ldiring</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saqlash tugmasi -->
+        <div class="flex justify-end gap-3">
+            <a asp-action="Index" 
+               class="px-6 py-2.5 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                Bekor qilish
+            </a>
+            <button type="submit" 
+                    class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                O'zgarishlarni saqlash
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Parol mosligini real-time tekshirish
+        document.addEventListener('DOMContentLoaded', function() {
+            const yangiParol = document.getElementById('yangiParol');
+            const yangiParolTasdiq = document.getElementById('yangiParolTasdiq');
+            const form = document.querySelector('form');
+
+            function checkPasswordMatch() {
+                if (yangiParolTasdiq.value && yangiParol.value !== yangiParolTasdiq.value) {
+                    yangiParolTasdiq.setCustomValidity('Parollar mos kelmaydi');
+                    yangiParolTasdiq.classList.add('border-red-500');
+                } else {
+                    yangiParolTasdiq.setCustomValidity('');
+                    yangiParolTasdiq.classList.remove('border-red-500');
+                }
+            }
+
+            yangiParol.addEventListener('input', checkPasswordMatch);
+            yangiParolTasdiq.addEventListener('input', checkPasswordMatch);
+
+            // Form validation
+            form.addEventListener('submit', function(e) {
+                const eskiParol = document.getElementById('eskiParol').value;
+                const yangiParolVal = yangiParol.value;
+                const yangiParolTasdiqVal = yangiParolTasdiq.value;
+
+                // Agar parol maydonlaridan bittasi to'ldirilgan bo'lsa, barchasini talab qilish
+                if ((eskiParol || yangiParolVal || yangiParolTasdiqVal) && 
+                    (!eskiParol || !yangiParolVal || !yangiParolTasdiqVal)) {
+                    e.preventDefault();
+                    alert('Parolni o\'zgartirish uchun barcha parol maydonlarini to\'ldiring.');
+                    return false;
+                }
+
+                if (yangiParolVal && yangiParolVal !== yangiParolTasdiqVal) {
+                    e.preventDefault();
+                    alert('Yangi parol va tasdiq paroli mos kelmaydi.');
+                    return false;
+                }
+
+                if (yangiParolVal && yangiParolVal.length < 6) {
+                    e.preventDefault();
+                    alert('Yangi parol kamida 6 ta belgidan iborat bo\'lishi kerak.');
+                    return false;
+                }
+            });
+        });
+    </script>
+}
+
+

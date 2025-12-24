@@ -1,0 +1,61 @@
+@model IEnumerable<talim_platforma.Models.Sertifikat>
+@{
+    Layout = "~/Views/Shared/_TalabaLayout.cshtml";
+    ViewData["Title"] = "Sertifikatlar";
+}
+
+<div class="max-w-6xl mx-auto space-y-5">
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl shadow-lg p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <p class="text-sm text-blue-100">Sertifikatlar</p>
+            <h1 class="text-2xl font-bold">Muvaffaqiyatlaringiz</h1>
+            <p class="text-sm text-blue-100 mt-1">Imtihonlardan o‘tganingizda avtomatik sertifikatlar shu yerda paydo bo‘ladi.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="/" class="px-4 py-2.5 rounded-xl bg-white/10 border border-white/30 text-white text-sm font-semibold hover:bg-white/15">
+                ← Bosh sahifa
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="rounded-2xl bg-blue-50 border border-blue-100 px-5 py-6 text-sm text-blue-800">
+            Hozircha sertifikatlar mavjud emas.
+        </div>
+    }
+    else
+    {
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var sertifikat in Model)
+            {
+                <div class="border border-gray-200 rounded-2xl p-4 shadow-sm bg-white flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <div class="text-xs uppercase tracking-wide text-gray-500">Sertifikat</div>
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold @(sertifikat.Status == "Faol" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600")">
+                            @sertifikat.Status
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">@sertifikat.Kurs?.Nomi</p>
+                        <p class="text-lg font-semibold text-gray-800">@sertifikat.Imtihon?.Nomi</p>
+                        <p class="text-xs text-gray-500 mt-1">Berilgan sana: @sertifikat.BerilganSana.ToString("dd.MM.yyyy")</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm text-gray-700">
+                        <span class="font-semibold">@sertifikat.Ball</span>
+                        <span class="text-gray-400">|</span>
+                        <span>@sertifikat.Foiz.ToString("F1")%</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="text-xs text-gray-500">Raqam: @sertifikat.SertifikatRaqami</div>
+                        <a asp-action="SertifikatPdf" asp-route-id="@sertifikat.Id" target="_blank"
+                           class="inline-flex items-center px-3 py-1.5 rounded-lg border border-blue-500 text-blue-600 text-xs font-semibold hover:bg-blue-50 transition-colors">
+                            📄 Yuklab olish
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+

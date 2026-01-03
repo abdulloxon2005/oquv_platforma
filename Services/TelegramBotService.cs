@@ -36,7 +36,7 @@ namespace talim_platforma.Services
                 receiverOptions,
                 ct
             );
-
+            
             Console.WriteLine("🤖 Telegram bot polling boshlandi...");
         }
 
@@ -95,7 +95,17 @@ namespace talim_platforma.Services
         // ⚠️ Xatolikni konsolga chiqarish
         private Task HandleErrorAsync(ITelegramBotClient bot, Exception ex, CancellationToken ct)
         {
-            Console.WriteLine($"⚠️ Telegram polling xatosi: {ex.Message}");
+            var errorMessage = ex.Message;
+            
+            // Timeout xatolarini alohida ko'rsatish
+            if (ex is HttpRequestException || ex is TaskCanceledException || 
+                (ex.InnerException is HttpRequestException || ex.InnerException is TaskCanceledException))
+            {
+                Console.WriteLine($"⚠️ Telegram tarmoq xatosi: {errorMessage}");
+                return Task.CompletedTask;
+            }
+            
+            Console.WriteLine($"⚠️ Telegram polling xatosi: {errorMessage}");
             return Task.CompletedTask;
         }
 
@@ -109,7 +119,17 @@ namespace talim_platforma.Services
             );
         }
 
-        // 💰 To‘lov amalga oshirilganda xabar yuborish
+        // 📨 HTML formatdagi xabarni yuborish (HTML belgilarini escape qilmaydi)
+        public async Task SendHtmlMessageAsync(long chatId, string htmlMessage)
+        {
+            await _bot.SendTextMessageAsync(
+                chatId: chatId,
+                text: htmlMessage,
+                parseMode: ParseMode.Html
+            );
+        }
+
+        // 💰 To'lov amalga oshirilganda xabar yuborish
         public async Task SendPaymentNotificationAsync(
             long chatId,
             string studentName,

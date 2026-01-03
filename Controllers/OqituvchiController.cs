@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,12 +26,14 @@ namespace talim_platforma.Controllers
         private readonly IStudentStatusService _studentStatusService;
         private readonly TelegramBotService _telegramBot;
         private readonly PasswordHasher<Foydalanuvchi> _passwordHasher;
+        private readonly ILogger<OqituvchiController> _logger;
 
-        public OqituvchiController(ApplicationDbContext context, IStudentStatusService studentStatusService, TelegramBotService telegramBot)
+        public OqituvchiController(ApplicationDbContext context, IStudentStatusService studentStatusService, TelegramBotService telegramBot, ILogger<OqituvchiController> logger)
         {
             _context = context;
             _studentStatusService = studentStatusService;
             _telegramBot = telegramBot;
+            _logger = logger;
             _passwordHasher = new PasswordHasher<Foydalanuvchi>();
         }
 
@@ -193,143 +196,340 @@ namespace talim_platforma.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> LoadAttendance(int guruhId, DateTime sana)
+        public async Task<IActionResult> LoadAttendance(int guruhId, string sana)  // DateTime emas, string!
         {
-            var teacher = GetCurrentTeacher();
-            if (teacher == null)
+            try
             {
-                return Unauthorized();
-            }
-
-            var guruh = await _context.Guruhlar
-                .Include(g => g.TalabaGuruhlar!)
-                    .ThenInclude(tg => tg.Talaba)
-                .FirstOrDefaultAsync(g => g.Id == guruhId && g.OqituvchiId == teacher.Id);
-
-            if (guruh == null)
-            {
-                return NotFound(new { message = "Guruh topilmadi." });
-            }
-
-            var requestedDate = sana.Date;
-
-            var davomatlar = await _context.Davomatlar
-                .Where(d => d.GuruhId == guruhId && d.Sana.Date == requestedDate)
-                .ToListAsync();
-
-            var response = guruh.TalabaGuruhlar!
-                .Where(tg => tg.Talaba != null)
-                .Select(tg =>
+                _logger?.LogInformation($"LoadAttendance called: guruhId={guruhId}, sana={sana}");
+                
+                var teacher = GetCurrentTeacher();
+                if (teacher == null)
                 {
-                    var record = davomatlar.FirstOrDefault(d => d.TalabaId == tg.TalabaId);
-                    return new
-                    {
-                        talabaId = tg.TalabaId,
-                        fio = $"{tg.Talaba!.Ism} {tg.Talaba.Familiya}".Trim(),
-                        holat = record?.Holati ?? string.Empty,
-                        yangilangan = record?.YangilanganVaqt
-                    };
-                })
-                .OrderBy(t => t.fio)
-                .ToList();
+                    _logger?.LogWarning("Teacher not found in LoadAttendance");
+                    return Json(new { success = false, message = "Foydalanuvchi autentifikatsiya qilinmagan." });
+                }
 
-            return Json(new { success = true, students = response });
+                // String'dan DateTime'ga o'zgartirish
+                if (!DateTime.TryParse(sana, out DateTime requestedDate))
+                {
+                    _logger?.LogWarning($"Invalid date format: {sana}");
+                    return Json(new { success = false, message = "Noto'g'ri sana formati." });
+                }
+
+                _logger?.LogInformation($"Loading attendance for group {guruhId}, date {requestedDate:yyyy-MM-dd}, teacher {teacher.Id}");
+
+                var guruh = await _context.Guruhlar
+                    .Include(g => g.TalabaGuruhlar!)
+                        .ThenInclude(tg => tg.Talaba)
+                    .FirstOrDefaultAsync(g => g.Id == guruhId && g.OqituvchiId == teacher.Id);
+
+                if (guruh == null)
+                {
+                    _logger?.LogWarning($"Group not found: guruhId={guruhId}, teacherId={teacher.Id}");
+                    return Json(new { success = false, message = "Guruh topilmadi." });
+                }
+
+                _logger?.LogInformation($"Group found: {guruh.Nomi}, students count: {guruh.TalabaGuruhlar?.Count ?? 0}");
+
+                var davomatlar = await _context.Davomatlar
+                    .Where(d => d.GuruhId == guruhId && d.Sana.Date == requestedDate.Date)
+                    .ToListAsync();
+
+                var dars = await _context.Darslar
+                    .FirstOrDefaultAsync(d => d.GuruhId == guruhId && d.Sana.Date == requestedDate.Date);
+
+                var baholar = new List<Baho>();
+                if (dars != null)
+                {
+                    baholar = await _context.Baholar
+                        .Where(b => b.DarsId == dars.Id)
+                        .ToListAsync();
+                }
+
+                var response = guruh.TalabaGuruhlar!
+                    .Where(tg => tg.Talaba != null)
+                    .Select(tg =>
+                    {
+                        var record = davomatlar.FirstOrDefault(d => d.TalabaId == tg.TalabaId);
+                        var baho = baholar.FirstOrDefault(b => b.TalabaId == tg.TalabaId);
+                        return new
+                        {
+                            talabaId = tg.TalabaId,
+                            fio = $"{tg.Talaba!.Ism} {tg.Talaba.Familiya}".Trim(),
+                            holat = record?.Holati ?? string.Empty,
+                            yangilangan = record?.YangilanganVaqt,
+                            baho = baho?.Ball
+                        };
+                    })
+                    .OrderBy(t => t.fio)
+                    .ToList();
+
+                _logger?.LogInformation($"Successfully loaded {response.Count} student records");
+                return Json(new { success = true, students = response });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Davomat ma'lumotlarini yuklashda xatolik yuz berdi");
+                return Json(new { success = false, message = $"Davomat ma'lumotlarini yuklashda xatolik: {ex.Message}" });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> SaveAttendance([FromBody] AttendanceSaveRequest request)
         {
-            if (request == null || request.GuruhId <= 0)
+            try
             {
-                return BadRequest(new { message = "Noto‘g‘ri ma'lumot yuborildi." });
-            }
-
-            var teacher = GetCurrentTeacher();
-            if (teacher == null)
-            {
-                return Unauthorized();
-            }
-
-            var guruh = await _context.Guruhlar
-                .Include(g => g.TalabaGuruhlar)
-                .FirstOrDefaultAsync(g => g.Id == request.GuruhId && g.OqituvchiId == teacher.Id);
-
-            if (guruh == null)
-            {
-                return NotFound(new { message = "Guruh topilmadi." });
-            }
-
-            var sana = request.Sana == default ? DateTime.Today : request.Sana.Date;
-
-            var talabaIds = guruh.TalabaGuruhlar?
-                .Select(tg => tg.TalabaId)
-                .ToHashSet() ?? new HashSet<int>();
-
-            var existingRecords = await _context.Davomatlar
-                .Where(d => d.GuruhId == request.GuruhId && d.Sana.Date == sana)
-                .ToListAsync();
-
-            var now = DateTime.Now;
-            var changedRecords = new List<Davomat>();
-            var filteredStudents = request.Talabalar?
-                .Where(t => talabaIds.Contains(t.TalabaId) && !string.IsNullOrWhiteSpace(t.Holati))
-                .ToList() ?? new List<AttendanceStudentRequest>();
-
-            if (!filteredStudents.Any())
-            {
-                return BadRequest(new { message = "Hech bir talaba uchun holat tanlanmadi." });
-            }
-
-            var dars = await EnsureDailyLessonAsync(guruh.Id, teacher.Id, sana);
-
-            foreach (var talaba in filteredStudents)
-            {
-                if (!YaroqliHolatlar.Contains(talaba.Holati!))
+                if (request == null || request.GuruhId <= 0)
                 {
-                    continue;
+                    return Json(new { success = false, message = "Noto'g'ri ma'lumot yuborildi." });
                 }
 
-                var record = existingRecords.FirstOrDefault(d => d.TalabaId == talaba.TalabaId);
-                if (record == null)
+                var teacher = GetCurrentTeacher();
+                if (teacher == null)
                 {
-                    var yangi = new Davomat
+                    return Json(new { success = false, message = "Foydalanuvchi autentifikatsiya qilinmagan." });
+                }
+
+                var guruh = await _context.Guruhlar
+                    .Include(g => g.TalabaGuruhlar)
+                    .FirstOrDefaultAsync(g => g.Id == request.GuruhId && g.OqituvchiId == teacher.Id);
+
+                if (guruh == null)
+                {
+                    return Json(new { success = false, message = "Guruh topilmadi." });
+                }
+
+                var sana = request.Sana == default ? DateTime.Today : request.Sana.Date;
+
+                var talabaIds = guruh.TalabaGuruhlar?
+                    .Select(tg => tg.TalabaId)
+                    .ToHashSet() ?? new HashSet<int>();
+
+                var existingRecords = await _context.Davomatlar
+                    .Where(d => d.GuruhId == request.GuruhId && d.Sana.Date == sana)
+                    .ToListAsync();
+
+                var now = DateTime.Now;
+                var changedRecords = new List<Davomat>();
+                var allStudents = request.Talabalar?
+                    .Where(t => talabaIds.Contains(t.TalabaId))
+                    .ToList() ?? new List<AttendanceStudentRequest>();
+
+                if (!allStudents.Any())
+                {
+                    return Json(new { success = false, message = "Talabalar topilmadi." });
+                }
+
+                // Holat tanlangan talabalar
+                var filteredStudents = allStudents
+                    .Where(t => !string.IsNullOrWhiteSpace(t.Holati))
+                    .ToList();
+
+                if (!filteredStudents.Any())
+                {
+                    return Json(new { success = false, message = "Hech bir talaba uchun holat tanlanmadi." });
+                }
+
+                var dars = await EnsureDailyLessonAsync(guruh.Id, teacher.Id, sana);
+
+                // Holat tanlanmagan talabalarning eski davomatlarini o'chirish
+                var holatTanlanmaganTalabalar = allStudents
+                    .Where(t => string.IsNullOrWhiteSpace(t.Holati))
+                    .Select(t => t.TalabaId)
+                    .ToList();
+
+                if (holatTanlanmaganTalabalar.Any())
+                {
+                    var oChiriladiganDavomatlar = existingRecords
+                        .Where(d => holatTanlanmaganTalabalar.Contains(d.TalabaId))
+                        .ToList();
+
+                    foreach (var davomat in oChiriladiganDavomatlar)
                     {
-                        GuruhId = guruh.Id,
-                        TalabaId = talaba.TalabaId,
-                        DarsId = dars.Id,
-                        OqituvchiId = teacher.Id,
-                        Sana = sana,
-                        Holati = talaba.Holati!,
-                        Izoh = talaba.Izoh,
-                        YaratilganVaqt = now,
-                        YangilanganVaqt = now
-                    };
-                    _context.Davomatlar.Add(yangi);
-                    changedRecords.Add(yangi);
+                        // Bahoni ham o'chirish
+                        var baho = await _context.Baholar
+                            .FirstOrDefaultAsync(b => b.DarsId == davomat.DarsId && b.TalabaId == davomat.TalabaId);
+                        if (baho != null)
+                        {
+                            _context.Baholar.Remove(baho);
+                        }
+                        _context.Davomatlar.Remove(davomat);
+                        changedRecords.Add(davomat);
+                    }
                 }
-                else if (record.Holati != talaba.Holati || record.Izoh != talaba.Izoh)
+
+                // Tangacha miqdori (har bir dars uchun 1000 so'm)
+                const decimal tangachaMiqdori = 1000m;
+
+                foreach (var talaba in filteredStudents)
                 {
-                    record.Holati = talaba.Holati!;
-                    record.Izoh = talaba.Izoh;
-                    record.YangilanganVaqt = now;
-                    changedRecords.Add(record);
+                    if (!YaroqliHolatlar.Contains(talaba.Holati!))
+                    {
+                        continue;
+                    }
+
+                    var record = existingRecords.FirstOrDefault(d => d.TalabaId == talaba.TalabaId);
+                    if (record == null)
+                    {
+                        var yangi = new Davomat
+                        {
+                            GuruhId = guruh.Id,
+                            TalabaId = talaba.TalabaId,
+                            DarsId = dars.Id,
+                            OqituvchiId = teacher.Id,
+                            Sana = sana,
+                            Holati = talaba.Holati!,
+                            Izoh = talaba.Izoh,
+                            YaratilganVaqt = now,
+                            YangilanganVaqt = now
+                        };
+                        _context.Davomatlar.Add(yangi);
+                        changedRecords.Add(yangi);
+                    }
+                    else if (record.Holati != talaba.Holati || record.Izoh != talaba.Izoh)
+                    {
+                        record.Holati = talaba.Holati!;
+                        record.Izoh = talaba.Izoh;
+                        record.YangilanganVaqt = now;
+                        changedRecords.Add(record);
+                    }
+
+                    // Baho qo'yish va tangacha qo'shish ("Keldi" va "Kech keldi" holatlarida)
+                    if ((talaba.Holati == "Keldi" || talaba.Holati == "Kech keldi") && talaba.Baho.HasValue && talaba.Baho.Value > 0)
+                    {
+                        var bahoFoiz = talaba.Baho.Value;
+                        
+                        // Bahoni saqlash yoki yangilash
+                        var mavjudBaho = await _context.Baholar
+                            .FirstOrDefaultAsync(b => b.DarsId == dars.Id && b.TalabaId == talaba.TalabaId);
+                        
+                        if (mavjudBaho == null)
+                        {
+                            mavjudBaho = new Baho
+                            {
+                                DarsId = dars.Id,
+                                TalabaId = talaba.TalabaId,
+                                Ball = bahoFoiz,
+                                Izoh = $"Dars uchun baho: {bahoFoiz}%",
+                                YaratilganVaqt = now,
+                                YangilanganVaqt = now
+                            };
+                            _context.Baholar.Add(mavjudBaho);
+                        }
+                        else
+                        {
+                            // Eski baho bilan yangi baho o'rtasidagi farqni hisoblash
+                            var eskiBaho = mavjudBaho.Ball;
+                            mavjudBaho.Ball = bahoFoiz;
+                            mavjudBaho.YangilanganVaqt = now;
+
+                            // Eski tangacha qo'shilgan bo'lsa, uni olib tashlash
+                            if (eskiBaho >= 50)
+                            {
+                                var talabaUserOld = await _context.Foydalanuvchilar.FindAsync(talaba.TalabaId);
+                                if (talabaUserOld != null)
+                                {
+                                    decimal eskiTangacha = 0;
+                                    if (eskiBaho == 100)
+                                    {
+                                        eskiTangacha = tangachaMiqdori;
+                                    }
+                                    else if (eskiBaho >= 50)
+                                    {
+                                        eskiTangacha = tangachaMiqdori * eskiBaho / 100;
+                                    }
+                                    if (eskiTangacha > 0 && talabaUserOld.Tangacha >= eskiTangacha)
+                                    {
+                                        talabaUserOld.Tangacha -= eskiTangacha;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Tangacha qo'shish (50% dan yuqori bo'lsa)
+                        if (bahoFoiz >= 50)
+                        {
+                            var talabaUser = await _context.Foydalanuvchilar.FindAsync(talaba.TalabaId);
+                            if (talabaUser != null)
+                            {
+                                decimal qoshiladiganTangacha = 0;
+                                
+                                if (bahoFoiz == 100)
+                                {
+                                    // 100% = to'liq qo'shiladi
+                                    qoshiladiganTangacha = tangachaMiqdori;
+                                }
+                                else if (bahoFoiz >= 50)
+                                {
+                                    // 50% va undan yuqori = foizga mos qo'shiladi
+                                    qoshiladiganTangacha = tangachaMiqdori * bahoFoiz / 100;
+                                }
+                                // 50% dan past = qo'shilmaydi
+
+                                if (qoshiladiganTangacha > 0)
+                                {
+                                    talabaUser.Tangacha += qoshiladiganTangacha;
+                                    talabaUser.YangilanganVaqt = now;
+                                }
+                            }
+                        }
+                    }
+                    else if ((talaba.Holati == "Keldi" || talaba.Holati == "Kech keldi") && (!talaba.Baho.HasValue || talaba.Baho.Value == 0))
+                    {
+                        // Agar "Keldi" yoki "Kech keldi" bo'lsa lekin baho berilmagan bo'lsa, mavjud bahoni o'chirish
+                        var mavjudBaho = await _context.Baholar
+                            .FirstOrDefaultAsync(b => b.DarsId == dars.Id && b.TalabaId == talaba.TalabaId);
+                        
+                        if (mavjudBaho != null)
+                        {
+                            // Eski tangacha qo'shilgan bo'lsa, uni olib tashlash
+                            var eskiBaho = mavjudBaho.Ball;
+                            if (eskiBaho >= 50)
+                            {
+                                var talabaUser = await _context.Foydalanuvchilar.FindAsync(talaba.TalabaId);
+                                if (talabaUser != null)
+                                {
+                                    decimal eskiTangacha = 0;
+                                    if (eskiBaho == 100)
+                                    {
+                                        eskiTangacha = tangachaMiqdori;
+                                    }
+                                    else if (eskiBaho >= 50)
+                                    {
+                                        eskiTangacha = tangachaMiqdori * eskiBaho / 100;
+                                    }
+                                    if (eskiTangacha > 0 && talabaUser.Tangacha >= eskiTangacha)
+                                    {
+                                        talabaUser.Tangacha -= eskiTangacha;
+                                        talabaUser.YangilanganVaqt = now;
+                                    }
+                                }
+                            }
+                            _context.Baholar.Remove(mavjudBaho);
+                        }
+                    }
                 }
-            }
 
-            if (!changedRecords.Any())
+                if (!changedRecords.Any())
+                {
+                    return Json(new { success = true, message = "O'zgarishlar topilmadi." });
+                }
+
+                await _context.SaveChangesAsync();
+
+                foreach (var record in changedRecords)
+                {
+                    await _studentStatusService.RefreshStudentStatusAsync(record.TalabaId, record.GuruhId);
+                    await SendAttendanceNotificationAsync(record, guruh, sana);
+                }
+
+                return Json(new { success = true, updated = changedRecords.Count });
+            }
+            catch (Exception ex)
             {
-                return Json(new { success = true, message = "O'zgarishlar topilmadi." });
+                _logger?.LogError(ex, "Davomatni saqlashda xatolik yuz berdi");
+                return Json(new { success = false, message = $"Davomatni saqlashda xatolik: {ex.Message}" });
             }
-
-            await _context.SaveChangesAsync();
-
-            foreach (var record in changedRecords)
-            {
-                await _studentStatusService.RefreshStudentStatusAsync(record.TalabaId, record.GuruhId);
-                await SendAttendanceNotificationAsync(record, guruh, sana);
-            }
-
-            return Json(new { success = true, updated = changedRecords.Count });
         }
 
         [HttpGet]
@@ -595,6 +795,7 @@ namespace talim_platforma.Controllers
             public int TalabaId { get; set; }
             public string? Holati { get; set; }
             public string? Izoh { get; set; }
+            public int? Baho { get; set; } // Baho foizi (10, 20, 30...100)
         }
     }
 }

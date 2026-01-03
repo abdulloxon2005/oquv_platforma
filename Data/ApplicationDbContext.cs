@@ -17,6 +17,8 @@ namespace talim_platforma.Data
         // 📚 Kurslar va guruhlar
         public DbSet<Kurs> Kurslar { get; set; }
         public DbSet<Guruh> Guruhlar { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
 
         // 👩‍🎓 Talaba aloqalari
         public DbSet<TalabaGuruh> TalabaGuruhlar { get; set; }
@@ -34,6 +36,9 @@ namespace talim_platforma.Data
 
         // 📢 Reklamalar
         public DbSet<Advertisement> Advertisements { get; set; }
+
+        // 📝 Kursga yozilish arizalari
+        public DbSet<KursApplication> KursApplications { get; set; }
 
 
         // 🧠 Imtihonlar
@@ -83,7 +88,7 @@ namespace talim_platforma.Data
             // 5️⃣ Talaba ↔️ Kurs (ko‘p:ko‘p)
             modelBuilder.Entity<TalabaKurs>()
                 .HasOne(tk => tk.Kurs)
-                .WithMany()
+                .WithMany(k => k.TalabaKurslar)
                 .HasForeignKey(tk => tk.KursId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -196,7 +201,7 @@ namespace talim_platforma.Data
             // 12️⃣ Imtihon ↔️ Natijalar
             modelBuilder.Entity<ImtihonNatija>()
                 .HasOne(n => n.Imtihon)
-                .WithMany()
+                .WithMany(i => i.Natijalar)
                 .HasForeignKey(n => n.ImtihonId)
                 .OnDelete(DeleteBehavior.Cascade);
 

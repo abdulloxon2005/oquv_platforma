@@ -21,12 +21,68 @@
         border-width: 1px;
         border-color: #e5e7eb;
         color: #6b7280;
+        transition: all 0.2s ease;
+    }
+
+    .status-btn:hover {
+        transform: scale(1.1);
     }
 
     .status-btn.active {
         border-color: #2563eb;
         background-color: #eff6ff;
         color: #1d4ed8;
+        transform: scale(1.05);
+    }
+    
+    .message-box {
+        transition: all 0.3s ease;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f3f3f3;
+        border-radius: 50%;
+        border-top-color: #3498db;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+    }
+    
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .student-row {
+        transition: all 0.2s ease;
+    }
+    
+    .student-row:hover {
+        background-color: #f8fafc;
+        transform: translateY(-1px);
+    }
+    
+    .baho-container {
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
 </style>
 
@@ -61,7 +117,7 @@
                         class="inline-flex items-center px-5 py-2 rounded-lg text-sm font-medium transition-colors @(attendanceDisabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-green-500 text-white hover:bg-green-600")"
                         @(attendanceDisabled ? "disabled" : null)
                         title="@(attendanceDisabled ? "Guruhda talaba yo'q" : "Davomat olish")">
-                    Davomat olish
+                    <span id="attendanceButtonText">Davomat olish</span>
                 </button>
             }
         </div>
@@ -70,10 +126,10 @@
     <!-- Filters -->
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm px-5 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div class="flex items-center gap-3 text-sm text-gray-500">
-            <span>Oy bo‘yicha ko‘rish</span>
+            <span>Oy bo'yicha ko'rish</span>
             <div class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
                 </svg>
                 <span class="text-sm text-gray-700 font-medium">
                     @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month) / @year
@@ -160,7 +216,7 @@
 
                             var sca = talabaDavomatlar.Count(d => d.Holati == "Keldi" || d.Holati == "Kech keldi");
 
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50 student-row">
                                 <td class="px-4 py-3 text-xs md:text-sm text-gray-700">@(i + 1)</td>
                                 <td class="px-4 py-3">
                                     <span class="text-sm text-gray-800 font-medium">
@@ -182,13 +238,13 @@
                                             if (davomat.Holati == "Keldi")
                                             {
                                                 <svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 00-1.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                                 </svg>
                                             }
                                             else if (davomat.Holati == "Kech keldi")
                                             {
                                                 <svg class="w-5 h-5 text-orange-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 00-1.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                                 </svg>
                                             }
                                             else
@@ -207,7 +263,7 @@
         else
         {
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-                <p class="text-gray-500">Bu guruhda hozircha talabalar yo‘q.</p>
+                <p class="text-gray-500">Bu guruhda hozircha talabalar yo'q.</p>
             </div>
         }
     }
@@ -223,7 +279,7 @@
 {
     <div id="attendanceModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 bg-black/50 hidden">
         <div id="attendanceModalBackdrop" class="absolute inset-0"></div>
-        <div class="relative bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200">
+        <div class="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-200">
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <div>
                     <p class="text-xs text-gray-500 uppercase tracking-wide">Guruh: @tanlanganGuruh.Nomi</p>
@@ -258,7 +314,7 @@
                     </div>
                 </div>
 
-                <div id="attendanceMessage" class="hidden text-sm rounded-lg px-4 py-2"></div>
+                <div id="attendanceMessage" class="message-box hidden text-sm rounded-lg px-4 py-2"></div>
 
                 <form id="attendanceForm"
                       data-group-id="@tanlanganGuruh.Id"
@@ -268,8 +324,8 @@
                     @Html.AntiForgeryToken()
                     @foreach (var talaba in talabalar.OrderBy(t => t.Ism))
                     {
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border border-gray-200 rounded-xl px-4 py-3" data-student-id="@talaba.Id">
-                            <div>
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border border-gray-200 rounded-xl px-4 py-3 student-row" data-student-id="@talaba.Id">
+                            <div class="flex-1">
                                 <p class="font-semibold text-gray-800">@talaba.Ism @talaba.Familiya</p>
                                 <p class="text-sm text-gray-500 status-label">Belgilanmagan</p>
                             </div>
@@ -284,6 +340,23 @@
                                     ✖
                                 </button>
                             </div>
+                            <!-- Baho qo'yish ("Keldi" va "Kech keldi" holatlarida ko'rinadi) -->
+                            <div class="baho-container hidden flex items-center gap-2">
+                                <label class="text-sm text-gray-600">Baho:</label>
+                                <select class="baho-select px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" data-student-id="@talaba.Id">
+                                    <option value="">Tanlang</option>
+                                    <option value="10">10%</option>
+                                    <option value="20">20%</option>
+                                    <option value="30">30%</option>
+                                    <option value="40">40%</option>
+                                    <option value="50">50%</option>
+                                    <option value="60">60%</option>
+                                    <option value="70">70%</option>
+                                    <option value="80">80%</option>
+                                    <option value="90">90%</option>
+                                    <option value="100">100%</option>
+                                </select>
+                            </div>
                         </div>
                     }
 
@@ -294,6 +367,7 @@
                                 Bekor qilish
                             </button>
                             <button type="submit"
+                                    id="attendanceButtonText"
                                     class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
                                 Saqlash
                             </button>
@@ -308,11 +382,74 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Modal elements
             const modal = document.getElementById('attendanceModal');
             const modalBackdrop = document.getElementById('attendanceModalBackdrop');
             const modalClose = document.getElementById('attendanceModalClose');
             const modalCancel = document.getElementById('attendanceModalCancel');
             const openModalBtn = document.getElementById('openAttendanceModal');
+            const attendanceButtonText = document.getElementById('attendanceButtonText');
+
+            // Form elements
+            const form = document.getElementById('attendanceForm');
+            const dateInput = document.getElementById('attendance-date');
+            const messageBox = document.getElementById('attendanceMessage');
+            const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+            const groupId = form.dataset.groupId;
+            const loadUrl = form.dataset.loadUrl;
+            const saveUrl = form.dataset.saveUrl;
+
+            // Status colors
+            const statusColors = {
+                'Keldi': 'text-green-600',
+                'Kech keldi': 'text-amber-500',
+                'Kelmadi': 'text-red-500'
+            };
+
+            // Message functions
+            function setMessage(text, type) {
+                if (!messageBox) {
+                    console.error('Message box element is null');
+                    return;
+                }
+                messageBox.textContent = text;
+                messageBox.classList.remove('hidden', 'bg-green-50', 'text-green-700', 'bg-red-50', 'text-red-700', 'bg-blue-50', 'text-blue-700', 'bg-yellow-50', 'text-yellow-700', 'bg-gray-50', 'text-gray-700');
+                
+                if (type === 'success') {
+                    messageBox.classList.add('bg-green-50', 'text-green-700');
+                } else if (type === 'error') {
+                    messageBox.classList.add('bg-red-50', 'text-red-700');
+                } else if (type === 'info') {
+                    messageBox.classList.add('bg-blue-50', 'text-blue-700');
+                } else if (type === 'warning') {
+                    messageBox.classList.add('bg-yellow-50', 'text-yellow-700');
+                } else {
+                    messageBox.classList.add('bg-gray-50', 'text-gray-700');
+                }
+            }
+
+            function resetMessage() {
+                if (!messageBox) {
+                    console.error('Message box element is null');
+                    return;
+                }
+                messageBox.classList.add('hidden');
+                messageBox.textContent = '';
+            }
+
+            function showLoading(isLoading = true) {
+                if (attendanceButtonText) {
+                    if (isLoading) {
+                        attendanceButtonText.innerHTML = '<span class="loading-spinner"></span> Yuklanmoqda...';
+                        attendanceButtonText.disabled = true;
+                    } else {
+                        attendanceButtonText.innerHTML = 'Davomat olish';
+                        attendanceButtonText.disabled = false;
+                    }
+                } else {
+                    console.warn('attendanceButtonText element not found');
+                }
+            }
 
             function updateSectionParam(isOpen) {
                 const url = new URL(window.location.href);
@@ -339,12 +476,22 @@
                 modal.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
                 updateSectionParam(false);
+                resetMessage();
             }
 
-            openModalBtn?.addEventListener('click', openModal);
-            modalClose?.addEventListener('click', closeModal);
-            modalCancel?.addEventListener('click', closeModal);
-            modalBackdrop?.addEventListener('click', closeModal);
+            // Event listeners
+            if (openModalBtn) {
+                openModalBtn.addEventListener('click', openModal);
+            }
+            if (modalClose) {
+                modalClose.addEventListener('click', closeModal);
+            }
+            if (modalCancel) {
+                modalCancel.addEventListener('click', closeModal);
+            }
+            if (modalBackdrop) {
+                modalBackdrop.addEventListener('click', closeModal);
+            }
             document.addEventListener('keydown', (evt) => {
                 if (evt.key === 'Escape') {
                     closeModal();
@@ -356,49 +503,43 @@
                 openModal();
             }
 
-            const form = document.getElementById('attendanceForm');
-            if (!form) {
-                return;
-            }
-
-            const dateInput = document.getElementById('attendance-date');
-            const messageBox = document.getElementById('attendanceMessage');
-            const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
-            const groupId = form.dataset.groupId;
-            const loadUrl = form.dataset.loadUrl;
-            const saveUrl = form.dataset.saveUrl;
-
-            const statusColors = {
-                'Keldi': 'text-green-600',
-                'Kech keldi': 'text-amber-500',
-                'Kelmadi': 'text-red-500'
-            };
-
-            function setMessage(text, type) {
-                messageBox.textContent = text;
-                messageBox.classList.remove('hidden', 'bg-green-50', 'text-green-700', 'bg-red-50', 'text-red-700');
-                if (type === 'success') {
-                    messageBox.classList.add('bg-green-50', 'text-green-700');
-                } else {
-                    messageBox.classList.add('bg-red-50', 'text-red-700');
-                }
-            }
-
-            function resetMessage() {
-                messageBox.classList.add('hidden');
-                messageBox.textContent = '';
-            }
-
+            // Status setting function
             function setRowStatus(row, status) {
+                if (!row) {
+                    console.error('Row element is null');
+                    return;
+                }
+                
                 row.dataset.selectedStatus = status || '';
                 const label = row.querySelector('.status-label');
+                if (!label) {
+                    console.error('Status label not found in row:', row);
+                    return;
+                }
                 label.textContent = status || 'Belgilanmagan';
                 label.className = 'text-sm status-label ' + (status ? `font-semibold ${statusColors[status] ?? 'text-gray-600'}` : 'text-gray-400');
+                
+                // Update button states
                 row.querySelectorAll('.status-btn').forEach(button => {
                     button.classList.toggle('active', button.dataset.status === status);
                 });
+                
+                // Show/hide grade container
+                const bahoContainer = row.querySelector('.baho-container');
+                if (bahoContainer) {
+                    if (status === 'Keldi' || status === 'Kech keldi') {
+                        bahoContainer.classList.remove('hidden');
+                    } else {
+                        bahoContainer.classList.add('hidden');
+                        const bahoSelect = row.querySelector('.baho-select');
+                        if (bahoSelect) {
+                            bahoSelect.value = '';
+                        }
+                    }
+                }
             }
 
+            // Initialize status buttons
             document.querySelectorAll('#attendanceForm [data-student-id]').forEach(row => {
                 row.querySelectorAll('.status-btn').forEach(button => {
                     button.addEventListener('click', () => {
@@ -407,45 +548,153 @@
                 });
             });
 
+            // Load attendance data function
             async function loadAttendanceData() {
                 resetMessage();
+                showLoading(true);
+                
+                // Validate parameters
+                if (!loadUrl || !groupId || !dateInput || !dateInput.value) {
+                    const missingParams = [];
+                    if (!loadUrl) missingParams.push('loadUrl');
+                    if (!groupId) missingParams.push('groupId');
+                    if (!dateInput) missingParams.push('dateInput element');
+                    if (!dateInput?.value) missingParams.push('date value');
+                    
+                    setMessage(`❌ Parametrlar topilmadi: ${missingParams.join(', ')}`, 'error');
+                    console.error('Missing parameters:', { loadUrl, groupId, dateInput: dateInput?.value });
+                    showLoading(false);
+                    return;
+                }
+                
                 try {
-                    const response = await fetch(`${loadUrl}?guruhId=${groupId}&sana=${dateInput.value}`);
-                    const data = await response.json();
+                    setMessage('📊 Ma\'lumotlar yuklanmoqda...', 'info');
+                    
+                    const url = `${loadUrl}?guruhId=${encodeURIComponent(groupId)}&sana=${encodeURIComponent(dateInput.value)}`;
+                    console.log('Loading attendance:', { groupId, date: dateInput.value, url });
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 15000);
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Cache-Control': 'no-cache'
+                        },
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    console.log('Response received:', response.status);
+                    
+                    if (!response.ok) {
+                        let errorMessage = 'Ma\'lumotni yuklashda xatolik.';
+                        try {
+                            const errorText = await response.text();
+                            const errorData = JSON.parse(errorText);
+                            errorMessage = errorData.message || errorMessage;
+                        } catch (e) {
+                            errorMessage = `Server xatosi: ${response.status}`;
+                        }
+                        setMessage(errorMessage, 'error');
+                        showLoading(false);
+                        return;
+                    }
+
+                    const text = await response.text();
+                    if (!text) {
+                        setMessage('Serverdan bo\'sh javob keldi.', 'error');
+                        showLoading(false);
+                        return;
+                    }
+                    
+                    const data = JSON.parse(text);
                     if (data.success) {
-                        document.querySelectorAll('#attendanceForm [data-student-id]').forEach(row => setRowStatus(row, ''));
+                        // Reset all rows first
+                        document.querySelectorAll('#attendanceForm [data-student-id]').forEach(row => {
+                            setRowStatus(row, '');
+                            const bahoSelect = row.querySelector('.baho-select');
+                            if (bahoSelect) bahoSelect.value = '';
+                        });
+                        
+                        // Set data for each student
                         data.students.forEach(item => {
                             const row = document.querySelector(`#attendanceForm [data-student-id="${item.talabaId}"]`);
                             if (row) {
                                 setRowStatus(row, item.holat || '');
+                                if (item.baho !== undefined && item.baho !== null) {
+                                    const bahoSelect = row.querySelector('.baho-select');
+                                    if (bahoSelect) {
+                                        bahoSelect.value = item.baho.toString();
+                                    }
+                                }
+                            } else {
+                                console.warn(`Row not found for student ID: ${item.talabaId}`);
                             }
                         });
-                        setMessage('Davomat ma\'lumotlari yangilandi.', 'success');
+                        
+                        setMessage(`✅ ${data.students.length} talaba ma\'lumoti yuklandi`, 'success');
                     } else {
                         setMessage(data.message || 'Ma\'lumotni yuklashda xatolik.', 'error');
                     }
                 } catch (err) {
-                    console.error(err);
-                    setMessage('Server bilan bog‘lanib bo‘lmadi.', 'error');
+                    console.error('Network error:', err);
+                    console.error('Error details:', {
+                        name: err.name,
+                        message: err.message,
+                        stack: err.stack
+                    });
+                    if (err.name === 'AbortError') {
+                        setMessage('⏰ Server javob berishda sekinlik bor.', 'warning');
+                    } else if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+                        setMessage('🌐 Internet aloqasini tekshiring.', 'error');
+                    } else {
+                        setMessage(`🌐 Xato: ${err.message}`, 'error');
+                    }
+                } finally {
+                    showLoading(false);
                 }
             }
 
-            loadAttendanceData();
-            dateInput.addEventListener('change', loadAttendanceData);
-
+            // Save attendance function
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 resetMessage();
+                showLoading(true);
 
+                // Validate parameters
+                if (!saveUrl || !groupId || !dateInput || !dateInput.value || !token) {
+                    const missingParams = [];
+                    if (!saveUrl) missingParams.push('saveUrl');
+                    if (!groupId) missingParams.push('groupId');
+                    if (!dateInput) missingParams.push('dateInput element');
+                    if (!dateInput?.value) missingParams.push('date value');
+                    if (!token) missingParams.push('security token');
+                    
+                    setMessage(`❌ Parametrlar topilmadi: ${missingParams.join(', ')}`, 'error');
+                    showLoading(false);
+                    return;
+                }
+
+                // Collect form data
                 const talabalar = Array.from(document.querySelectorAll('#attendanceForm [data-student-id]'))
-                    .map(row => ({
-                        talabaId: Number(row.dataset.studentId),
-                        holati: row.dataset.selectedStatus || ''
-                    }))
-                    .filter(item => item.holati);
+                    .map(row => {
+                        const holati = row.dataset.selectedStatus || '';
+                        const bahoSelect = row.querySelector('.baho-select');
+                        const baho = bahoSelect && bahoSelect.value ? parseInt(bahoSelect.value) : null;
+                        return {
+                            talabaId: Number(row.dataset.studentId),
+                            holati: holati,
+                            baho: baho
+                        };
+                    });
 
-                if (!talabalar.length) {
+                // Check if at least one student has status
+                const tanlanganTalabalar = talabalar.filter(item => item.holati);
+                if (!tanlanganTalabalar.length) {
                     setMessage('Hech bo‘lmasa bitta talaba uchun holat tanlang.', 'error');
+                    showLoading(false);
                     return;
                 }
 
@@ -456,27 +705,68 @@
                 };
 
                 try {
+                    setMessage('💾 Davomat saqlanmoqda...', 'info');
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 20000);
+                    
                     const response = await fetch(saveUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'RequestVerificationToken': token
+                            'RequestVerificationToken': token,
+                            'Accept': 'application/json'
                         },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
                     });
 
-                    const data = await response.json();
+                    clearTimeout(timeoutId);
+                    console.log('Save response:', response.status);
+                    
+                    if (!response.ok) {
+                        let errorMessage = 'Davomatni saqlashda xatolik.';
+                        try {
+                            const errorText = await response.text();
+                            const errorData = JSON.parse(errorText);
+                            errorMessage = errorData.message || errorMessage;
+                        } catch (e) {
+                            errorMessage = `Server xatosi: ${response.status}`;
+                        }
+                        setMessage(errorMessage, 'error');
+                        showLoading(false);
+                        return;
+                    }
+
+                    const text = await response.text();
+                    if (!text) {
+                        setMessage('✅ Davomat saqlandi!', 'success');
+                        await loadAttendanceData();
+                        return;
+                    }
+                    
+                    const data = JSON.parse(text);
                     if (data.success) {
-                        setMessage('Davomat muvaffaqiyatli saqlandi.', 'success');
+                        setMessage(`✅ ${data.updated || tanlanganTalabalar.length} ta davomat saqlandi!`, 'success');
                         await loadAttendanceData();
                     } else {
                         setMessage(data.message || 'Davomatni saqlashda xatolik.', 'error');
                     }
                 } catch (err) {
-                    console.error(err);
-                    setMessage('Server bilan bog‘lanib bo‘lmadi.', 'error');
+                    console.error('Save error:', err);
+                    if (err.name === 'AbortError') {
+                        setMessage('⏰ Server javob berishda sekinlik bor.', 'warning');
+                    } else {
+                        setMessage('🌐 Server bilan aloqa o\'rnatilmadi.', 'error');
+                    }
+                } finally {
+                    showLoading(false);
                 }
             });
+
+            // Load initial data and set up date change listener
+            loadAttendanceData();
+            dateInput.addEventListener('change', loadAttendanceData);
         });
     </script>
 }

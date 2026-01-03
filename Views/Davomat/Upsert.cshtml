@@ -1,7 +1,7 @@
 @model talim_platforma.Models.ViewModels.DavomatCreateViewModel
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
-    var title = Model?.Id.HasValue == true ? "Davomatni tahrirlash" : "Davomat qo‘shish";
+    var title = Model?.Id.HasValue == true ? "Davomatni tahrirlash" : "Davomat qo'shish";
     ViewData["Title"] = title;
     var guruhlar = ViewBag.Guruhlar as SelectList;
     var talabalar = ViewBag.Talabalar as SelectList;
@@ -15,63 +15,75 @@
         <a asp-action="Index" asp-route-guruhId="@Model?.GuruhId" class="btn btn-outline-secondary">⬅️ Ortga</a>
     </div>
 
-    <form asp-action="@(Model?.Id.HasValue == true ? "Edit" : "Create")" method="post" class="card shadow-sm p-4">
-        @Html.AntiForgeryToken()
-        <input asp-for="Id" type="hidden" />
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="@(Model?.Id.HasValue == true ? "Edit" : "Create")" method="post" class="card shadow-sm">
+                @Html.AntiForgeryToken()
+                <input asp-for="Id" type="hidden" />
 
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label asp-for="GuruhId" class="form-label"></label>
-                <select asp-for="GuruhId" class="form-select" asp-items="guruhlar" onchange="onGroupChanged(this.value)">
-                    <option value="">Guruh tanlang</option>
-                </select>
-                <span asp-validation-for="GuruhId" class="text-danger"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="TalabaId" class="form-label"></label>
-                <select asp-for="TalabaId" class="form-select" asp-items="talabalar">
-                    <option value="">Talaba tanlang</option>
-                </select>
-                <span asp-validation-for="TalabaId" class="text-danger"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="DarsId" class="form-label"></label>
-                <select asp-for="DarsId" class="form-select" asp-items="darslar">
-                    <option value="">Dars tanlang</option>
-                </select>
-                <span asp-validation-for="DarsId" class="text-danger"></span>
-            </div>
-        </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="GuruhId" class="form-label"></label>
+                            <select asp-for="GuruhId" class="form-select" asp-items="guruhlar" onchange="onGroupChanged(this.value)">
+                                <option value="">Guruh tanlang</option>
+                            </select>
+                            <span asp-validation-for="GuruhId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TalabaId" class="form-label"></label>
+                            <select asp-for="TalabaId" class="form-select" asp-items="talabalar">
+                                <option value="">Talaba tanlang</option>
+                            </select>
+                            <span asp-validation-for="TalabaId" class="text-danger"></span>
+                        </div>
+                    </div>
 
-        <div class="row g-3 mt-1">
-            <div class="col-md-4">
-                <label asp-for="Sana" class="form-label"></label>
-                <input asp-for="Sana" class="form-control" type="date" />
-                <span asp-validation-for="Sana" class="text-danger"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="Holati" class="form-label"></label>
-                <select asp-for="Holati" class="form-select">
-                    @foreach (var status in statuses)
-                    {
-                        <option value="@status" selected="@(Model?.Holati == status)">
-                            @status
-                        </option>
-                    }
-                </select>
-                <span asp-validation-for="Holati" class="text-danger"></span>
-            </div>
-            <div class="col-md-4">
-                <label asp-for="Izoh" class="form-label"></label>
-                <input asp-for="Izoh" class="form-control" />
-                <span asp-validation-for="Izoh" class="text-danger"></span>
-            </div>
-        </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label asp-for="DarsId" class="form-label"></label>
+                            <select asp-for="DarsId" class="form-select" asp-items="darslar">
+                                <option value="">Dars tanlang</option>
+                            </select>
+                            <span asp-validation-for="DarsId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Sana" class="form-label"></label>
+                            <input asp-for="Sana" class="form-control" type="date" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="Sana" class="text-danger"></span>
+                        </div>
+                    </div>
 
-        <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-success">Saqlash</button>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label asp-for="Holati" class="form-label"></label>
+                            <select asp-for="Holati" class="form-select">
+                                <option value="">Holat tanlang</option>
+                                @foreach (var status in statuses)
+                                {
+                                    <option value="@status" selected="@(Model?.Holati == status)">
+                                        @status
+                                    </option>
+                                }
+                            </select>
+                            <span asp-validation-for="Holati" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Izoh" class="form-label"></label>
+                            <input asp-for="Izoh" class="form-control" placeholder="Izoh (ixtiyoriy)" />
+                            <span asp-validation-for="Izoh" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer text-end">
+                    <button type="submit" class="btn btn-success">
+                        @(Model?.Id.HasValue == true ? "Yangilash" : "Saqlash")
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
@@ -83,6 +95,32 @@
             params.set('guruhId', groupId);
             window.location.href = `${window.location.pathname}?${params.toString()}`;
         }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const guruhId = document.getElementById('GuruhId').value;
+            const talabaId = document.getElementById('TalabaId').value;
+            const darsId = document.getElementById('DarsId').value;
+            const holati = document.getElementById('Holati').value;
+            const sana = document.getElementById('Sana').value;
+
+            if (!guruhId || !talabaId || !darsId || !holati || !sana) {
+                e.preventDefault();
+                alert('Iltimos, barcha majburiy maydonlarni to\'ldiring!');
+                return false;
+            }
+
+            // Sanani tekshirish
+            const selectedDate = new Date(sana);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDate > today) {
+                e.preventDefault();
+                alert('Kelajak sanasiga davomat qo\'shib bo\'lmaydi!');
+                return false;
+            }
+        });
     </script>
 }
 

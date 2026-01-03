@@ -1,135 +1,464 @@
 ﻿@{
-    ViewData["Title"] = "Talim Plus";
+    ViewData["Title"] = "Talim Plus Education Center";
 }
 
-<div class="mb-10">
+<!-- HERO SECTION IN LARGE CARD -->
+<div class="min-h-screen bg-white flex items-center justify-center p-8">
+    <div class="max-w-6xl w-full">
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl p-8 md:p-16 shadow-2xl">
+            <div class="text-center slide-up">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight text-white">
+                    Talim Plus Education Center <br>Bilim va tajriba markazi
+                </h1>
+                <div class="bg-white/20 backdrop-blur text-white p-6 rounded-2xl shadow-2xl max-w-3xl mx-auto mb-8">
+                    <p class="text-xl md:text-2xl font-medium mb-4">
+                        "Ta'lim - bu hayotdagi eng yaxshi sarmoya. Kelajakni bugundan quring!"
+                    </p>
+                    <p class="text-lg italic opacity-90">
+                        Zamonaviy IT va til kurslari bilan o'z bilimingizni rivojlantiring. Professional ustozlar, amaliy darslar va kafolatlangan natija.
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="openModal()" class="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-50 hover:scale-105 transition-all shadow-lg">
+                        Kursga yozilish
+                    </button>
+                    
+                    <!-- <a href="#courses" class="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-blue-600 transition-all">
+                        Batafsil
+                    </a> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KURSGA YOZILISH MODAL OYNASI -->
+<div id="kursModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8 relative">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl">
+            ×
+        </button>
+        
+        <h3 class="text-2xl font-bold mb-6 text-center text-blue-600">Kursga yozilish</h3>
+        
+        @if (TempData["Success"] != null)
+        {
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                @TempData["Success"]
+            </div>
+        }
+        
+        <form asp-action="KursgaYozilish" method="post">
+            @Html.AntiForgeryToken()
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="Ism">
+                    Ism *
+                </label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" 
+                       id="Ism" name="Ism" type="text" required placeholder="Ismingizni kiriting">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="Familiya">
+                    Familiya *
+                </label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" 
+                       id="Familiya" name="Familiya" type="text" required placeholder="Familiyangizni kiriting">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="Telefon">
+                    Telefon raqam *
+                </label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" 
+                       id="Telefon" name="Telefon" type="tel" required placeholder="+998 XX XXX XX XX">
+            </div>
+            
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition-colors">
+                    Kurslarga yozilish
+                </button>
+                <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-400 transition-colors">
+                    Bekor qilish
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TIZIMGA KIRISH MODAL OYNASI -->
+<div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-[380px] p-8 relative shadow-2xl overflow-hidden">
+        <!-- Purple gradient top -->
+        <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-500 to-purple-400 rounded-t-3xl"></div>
+        
+        <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-white hover:text-gray-200 text-2xl z-10">
+            ×
+        </button>
+        
+        <!-- Login title -->
+        <div class="relative z-10 text-center mb-8 mt-8">
+            <h2 class="text-3xl font-bold text-white">Login</h2>
+        </div>
+
+        <form id="loginForm" class="relative z-10">
+            @Html.AntiForgeryToken()
+            
+            <!-- Login field -->
+            <div class="mb-6">
+                <input type="text" name="login" id="login" 
+                       class="w-full border-b-2 border-gray-300 py-3 px-2 text-gray-700 focus:outline-none focus:border-purple-500 transition-colors bg-transparent" 
+                       placeholder="Login" required />
+            </div>
+            
+            <!-- Password field -->
+            <div class="mb-8">
+                <input type="password" name="parol" id="parol" 
+                       class="w-full border-b-2 border-gray-300 py-3 px-2 text-gray-700 focus:outline-none focus:border-purple-500 transition-colors bg-transparent" 
+                       placeholder="Password" required autocomplete="current-password" />
+            </div>
+            
+            <!-- Login button -->
+            <button type="submit" 
+                    class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 rounded-full text-lg hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg">
+                Login
+            </button>
+        </form>
+    </div>
+
+        <!-- Error Modal -->
+        <div id="errorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-8 max-w-sm mx-4">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 0 8 8 0 016 0zm1 1H9a1 1 0 00-1 1v4a1 1 0 002 2h1a1 1 0 002-2V9a1 1 0 00-1-1H9a1 1 0 00-1 1v4a1 1 0 002 2h1a1 1 0 002-2V9a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-red-600 mb-2">Xatolik yuz berdi!</h3>
+                    <p id="errorMessage" class="text-gray-600 mb-6">Login yoki parol noto'g'ri kiritilgan.</p>
+                    <button onclick="closeErrorModal()" 
+                            class="w-full bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition-all">
+                        Qayta urinib ko'rish
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MUVAFFAQIYATLI XABAR MODALI -->
+<div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8 relative text-center">
+        <div class="mb-6">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-2xl font-bold mb-2 text-green-600">Arizangiz muvaffaqiyatli yuborildi!</h3>
+            <p class="text-gray-600 mb-6">Sizning so'rovingiz qabul qilindi. Tez orada siz bilan bog'lanamiz.</p>
+        </div>
+        
+        <button onclick="closeSuccessModal()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-colors">
+            Rahmat
+        </button>
+    </div>
+</div>
+
+<!-- REKLAMA SECTION -->
+<div class="mb-16">
     @await Component.InvokeAsync("Ads", new { target = "home" })
 </div>
 
-<!-- HERO SECTION -->
-<div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl p-10 md:p-16 mt-5 flex flex-col md:flex-row items-center justify-between">
-    <div class="md:w-1/2">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-            Kelajak bu yerda boshlanadi!
-        </h1>
-        <p class="text-lg mb-6">
-            Zamonaviy IT va til kurslari bilan o‘z bilimingizni rivojlantiring.
-        </p>
-
-        <a href="/Courses" class="inline-block bg-white text-blue-700 px-6 py-3 rounded-full font-semibold hover:bg-gray-200">
-            Kurslarga yozilish
-        </a>
-    </div>
-
-    <img src="/images/education.png" alt="education banner" class="md:w-1/2 mt-6 md:mt-0">
+<!-- KURSLAR SECTION -->
+<div id="courses" class="mb-16">
+    @await Component.InvokeAsync("Courses")
 </div>
-
 
 <!-- WHY US SECTION -->
-<div class="mt-20">
-    <h2 class="text-3xl font-bold text-center mb-10">Nega aynan biz?</h2>
+<div class="max-w-6xl mx-auto bg-white rounded-3xl p-8 md:p-16 shadow-xl mb-16 border border-gray-100">
+    <div class="text-center mb-16 fade-in">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-blue-600">Nega aynan biz?</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Biz sizning muvaffaqiyatingiz uchun eng yaxshi sharoitlarni yaratdik
+        </p>
+    </div>
 
     <div class="grid md:grid-cols-3 gap-8">
-        <div class="p-6 bg-white shadow-md rounded-xl text-center">
-            <h3 class="text-xl font-semibold mb-3">🎓 Professional ustozlar</h3>
-            <p class="text-gray-600">Ko‘p yillik tajribaga ega malakali o‘qituvchilar.</p>
+        <div class="text-center group hover-lift">
+            <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-100 transition-colors border border-blue-100">
+                <span class="text-3xl">🎓</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">Professional ustozlar</h3>
+            <p class="text-gray-600 text-lg leading-relaxed">Ko'p yillik tajribaga ega malakali o'qituvchilar sizni eng yuqori natijalarga yetaklaydi.</p>
         </div>
         
-        <div class="p-6 bg-white shadow-md rounded-xl text-center">
-            <h3 class="text-xl font-semibold mb-3">🕒 Moslashuvchan darslar</h3>
-            <p class="text-gray-600">Online va offline darslar jadvali sizga mos tarzda.</p>
+        <div class="text-center group hover-lift">
+            <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-100 transition-colors border border-blue-100">
+                <span class="text-3xl">🕒</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">Moslashuvchan darslar</h3>
+            <p class="text-gray-600 text-lg leading-relaxed">Online va offline darslar jadvali sizga mos tarzda, qulay vaqtda o'qing.</p>
         </div>
 
-        <div class="p-6 bg-white shadow-md rounded-xl text-center">
-            <h3 class="text-xl font-semibold mb-3">📚 Zamonaviy metodika</h3>
-            <p class="text-gray-600">Amaliy darslar, real loyihalar va interaktiv mashg‘ulotlar.</p>
+        <div class="text-center group hover-lift">
+            <div class="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-100 transition-colors border border-blue-100">
+                <span class="text-3xl">📚</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">Zamonaviy metodika</h3>
+            <p class="text-gray-600 text-lg leading-relaxed">Amaliy darslar, real loyihalar va interaktiv mashg'ulotlar bilan samarali o'rganing.</p>
         </div>
     </div>
 </div>
-
 
 <!-- STATISTICS SECTION -->
-<div class="mt-20 bg-blue-50 py-12 rounded-xl">
-    <div class="grid md:grid-cols-3 text-center gap-10">
-        <div>
-            <h3 class="text-4xl font-bold text-blue-700">1500+</h3>
-            <p class="text-gray-700 mt-2">Bitiruvchilar</p>
+<div class="max-w-6xl mx-auto bg-gradient-to-br from-blue-50 to-white rounded-3xl p-8 md:p-16 mb-16 border border-blue-100">
+    <div class="text-center mb-12 fade-in">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-blue-600">Bizning raqamlar</h2>
+        <p class="text-xl text-gray-600">Natijalar gapiradi</p>
+    </div>
+    <div class="grid md:grid-cols-4 gap-8">
+        <div class="text-center group">
+            <div class="text-5xl font-bold text-blue-600 mb-2">1500+</div>
+            <p class="text-gray-800 font-semibold text-lg">Bitiruvchilar</p>
         </div>
-        <div>
-            <h3 class="text-4xl font-bold text-blue-700">20+</h3>
-            <p class="text-gray-700 mt-2">Kurslar</p>
+        <div class="text-center group">
+            <div class="text-5xl font-bold text-blue-600 mb-2">20+</div>
+            <p class="text-gray-800 font-semibold text-lg">Kurslar</p>
         </div>
-        <div>
-            <h3 class="text-4xl font-bold text-blue-700">5 yil</h3>
-            <p class="text-gray-700 mt-2">Tajriba</p>
+        <div class="text-center group">
+            <div class="text-5xl font-bold text-blue-600 mb-2">5 yil</div>
+            <p class="text-gray-800 font-semibold text-lg">Tajriba</p>
+        </div>
+        <div class="text-center group">
+            <div class="text-5xl font-bold text-blue-600 mb-2">98%</div>
+            <p class="text-gray-800 font-semibold text-lg">Muvaffaqiyat</p>
         </div>
     </div>
 </div>
 
-
-<!-- POPULAR COURSES SECTION -->
-<div class="mt-20">
-    <h2 class="text-3xl font-bold text-center mb-10">Mashhur kurslar</h2>
-
-    <div class="grid md:grid-cols-3 gap-8">
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
-            <img src="/images/course1.jpg" class="w-full h-48 object-cover">
-            <div class="p-5">
-                <h3 class="font-semibold text-xl mb-2">Frontend dasturlash</h3>
-                <p class="text-gray-600 mb-4">HTML, CSS, JavaScript, React bo‘yicha amaliy kurs.</p>
-                <a href="/Courses/Frontend" class="text-blue-600 font-semibold">Batafsil →</a>
-            </div>
-        </div>
-
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
-            <img src="/images/course2.jpg" class="w-full h-48 object-cover">
-            <div class="p-5">
-                <h3 class="font-semibold text-xl mb-2">Ingliz tili</h3>
-                <p class="text-gray-600 mb-4">Zero dan IELTSgacha bosqichma-bosqich o‘qitish.</p>
-                <a href="/Courses/English" class="text-blue-600 font-semibold">Batafsil →</a>
-            </div>
-        </div>
-
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
-            <img src="/images/course3.jpg" class="w-full h-48 object-cover">
-            <div class="p-5">
-                <h3 class="font-semibold text-xl mb-2">Python asoslari</h3>
-                <p class="text-gray-600 mb-4">Dasturlashga kirish va real loyihalar bilan o‘rganish.</p>
-                <a href="/Courses/Python" class="text-blue-600 font-semibold">Batafsil →</a>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 <!-- STUDENT REVIEWS SECTION -->
-<div class="mt-20">
-    <h2 class="text-3xl font-bold text-center mb-10">O‘quvchilar fikrlari</h2>
+<div class="max-w-6xl mx-auto bg-gradient-to-br from-blue-50 to-white rounded-3xl p-8 md:p-16 mb-16 border border-blue-100">
+    <div class="text-center mb-16 fade-in">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-blue-600">O'quvchilar fikrlari</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Bitiruvchilarimizning haqiqiy tajribalari
+        </p>
+    </div>
 
     <div class="grid md:grid-cols-3 gap-8">
-        <div class="p-6 bg-white shadow-md rounded-xl">
-            <p class="text-gray-700 italic">"Ustozlarning tushuntirish uslubi zo'r, darslar juda qiziqarli!"</p>
-            <h4 class="mt-4 font-semibold text-blue-700">Aziza Q.</h4>
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift border border-gray-100">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    AQ
+                </div>
+                <div class="ml-4">
+                    <h4 class="font-bold text-xl text-gray-800">Aziza Q.</h4>
+                    <div class="flex text-blue-500">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+            <p class="text-gray-700 italic text-lg leading-relaxed">"Ustozlarning tushuntirish uslubi zo'r, darslar juda qiziqarli! Hech qachon bunday samarali o'qimagandim."</p>
         </div>
 
-        <div class="p-6 bg-white shadow-md rounded-xl">
-            <p class="text-gray-700 italic">"Frontend kursini bitirib hozir firmada ishlayapman."</p>
-            <h4 class="mt-4 font-semibold text-blue-700">Javohir S.</h4>
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift border border-gray-100">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    JS
+                </div>
+                <div class="ml-4">
+                    <h4 class="font-bold text-xl text-gray-800">Javohir S.</h4>
+                    <div class="flex text-blue-500">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+            <p class="text-gray-700 italic text-lg leading-relaxed">"Frontend kursini bitirib hozir firmada ishlayapman. Kurs davomida real loyihalar qildik, bu juda yordam berdi."</p>
         </div>
 
-        <div class="p-6 bg-white shadow-md rounded-xl">
-            <p class="text-gray-700 italic">"IELTS uchun tayyorlandim va 6.5 oldim, rahmat!"</p>
-            <h4 class="mt-4 font-semibold text-blue-700">Madina X.</h4>
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover-lift border border-gray-100">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    MX
+                </div>
+                <div class="ml-4">
+                    <h4 class="font-bold text-xl text-gray-800">Madina X.</h4>
+                    <div class="flex text-blue-500">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+            <p class="text-gray-700 italic text-lg leading-relaxed">"IELTS uchun tayyorlandim va 6.5 oldim, rahmat! Ustozlar juda malakali va individual yondashuvdi."</p>
         </div>
     </div>
 </div>
 
 
-<!-- CTA SECTION -->
-<div class="mt-20 text-center bg-blue-600 text-white py-12 rounded-xl">
-    <h2 class="text-3xl font-bold mb-4">O‘qishni bugundan boshlang!</h2>
-    <p class="mb-6">Eng yaxshi kurslarga hoziroq ro‘yxatdan o‘ting.</p>
-    <a href="/Auth/Register" class="bg-white text-blue-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-200">
-        Ro‘yxatdan o‘tish
-    </a>
-</div>
+
+<script>
+function openModal() {
+    document.getElementById('kursModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('kursModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    // Formani tozalash
+    document.querySelector('#kursModal form').reset();
+}
+
+function openLoginModal() {
+    document.getElementById('loginModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLoginModal() {
+    document.getElementById('loginModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    // Login formani tozalash
+    document.getElementById('loginForm').reset();
+}
+
+function closeSuccessModal() {
+    document.getElementById('successModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function showSuccessModal() {
+    document.getElementById('successModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+// Modal tashqarisiga bosilganda yopish
+document.getElementById('kursModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+
+document.getElementById('successModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSuccessModal();
+    }
+});
+
+// Login modal tashqarisiga bosilganda yopish
+document.getElementById('loginModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeLoginModal();
+    }
+});
+
+// Error modal tashqarisiga bosilganda yopish
+document.getElementById('errorModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeErrorModal();
+    }
+});
+
+// ESC tugmasi bilan yopish
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+        closeLoginModal();
+        closeSuccessModal();
+    }
+});
+
+// Login formani yuborish
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const login = document.getElementById('login').value;
+    const parol = document.getElementById('parol').value;
+    
+    // Simple validation
+    if (!login || !parol) {
+        showErrorModal();
+        return;
+    }
+    
+    // Backend ga yuborish va javobni kutish
+    fetch('/Auth/Login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: new URLSearchParams(new FormData(this))
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Clear form fields
+            document.getElementById('login').value = '';
+            document.getElementById('parol').value = '';
+            // Avtomatik yo'naltirish
+            window.location.href = data.redirect || '/Admin/Index';
+        } else {
+            // Backend dan kelgan xatolikni ko'rsatish
+            showErrorModalWithMessage(data.message || "Login yoki parol noto'g'ri kiritilgan.");
+        }
+    })
+    .catch(error => {
+        // Agar fetch ishlamasa, oddiy form submission
+        this.submit();
+    });
+});
+
+function showErrorModal() {
+    document.getElementById('errorModal').classList.remove('hidden');
+}
+
+function showErrorModalWithMessage(message) {
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorModal').classList.remove('hidden');
+}
+
+function closeErrorModal() {
+    document.getElementById('errorModal').classList.add('hidden');
+}
+
+// Formani yuborish
+document.querySelector('#kursModal form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeModal();
+            showSuccessModal();
+        } else {
+            let errorMessage = 'Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.';
+            if (data.errors && data.errors.length > 0) {
+                errorMessage = data.errors.join(', ');
+            }
+            alert(errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Agar fetch ishlamasa, oddiy form submission
+        this.submit();
+    });
+});
+
+// Agar TempData["Success"] bo'lsa, success modalni ko'rsatish
+document.addEventListener('DOMContentLoaded', function() {
+    const successMessage = document.querySelector('#kursModal .bg-green-100');
+    if (successMessage && successMessage.textContent.trim()) {
+        closeModal();
+        setTimeout(showSuccessModal, 500);
+    }
+});
+</script>

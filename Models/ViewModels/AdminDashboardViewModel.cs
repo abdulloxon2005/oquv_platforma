@@ -23,11 +23,13 @@ namespace talim_platforma.Models.ViewModels
         public int TotalTeachers { get; set; }
         public int TotalCourses { get; set; }
         public int ActiveGroups { get; set; }
+        public int KursApplicationsCount { get; set; }
         public decimal TodaysIncome { get; set; }
         public decimal MonthlyIncome { get; set; }
         public int UpcomingExams { get; set; }
         public List<Tolov> RecentPayments { get; set; } = new();
         public List<Guruh> RecentGroups { get; set; } = new();
+        public List<KursApplication> RecentKursApplications { get; set; } = new();
     }
 }
 

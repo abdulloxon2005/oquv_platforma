@@ -13,6 +13,7 @@ builder.Services.AddScoped<IStudentStatusService, StudentStatusService>();
 
 builder.Services.AddSingleton<TelegramBotService>();
 builder.Services.AddHostedService<BotHostedService>();
+builder.Services.AddHostedService<MonthlyPaymentResetService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -38,6 +39,7 @@ builder.Services.AddSession();
 builder.Services.AddHttpClient();
 
 // builder.WebHost.UseUrls("http://0.0.0.0:5024");
+builder.WebHost.UseUrls("http://localhost:5025");
 var app = builder.Build();
 
 // 🔁 Middleware
@@ -48,17 +50,17 @@ if (!app.Environment.IsDevelopment())
 }
 
 // 🔧 Ensure database is migrated (creates Advertisements table, etc.)
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+//     db.Database.Migrate();
+// }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
-// 🔐 Auth middleware lar
+// 🔐 Auth middleware lar - to'g'ri tartibda joylashtirildi
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

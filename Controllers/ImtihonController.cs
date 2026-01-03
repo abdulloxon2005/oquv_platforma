@@ -24,7 +24,7 @@ using WordParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
 
 namespace talim_platforma.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "teacher,admin")]
     [AutoValidateAntiforgeryToken]
     public class ImtihonController : Controller
     {
@@ -1084,6 +1084,21 @@ namespace talim_platforma.Controllers
                         created++;
                     }
 
+                    // Tangacha qo'shish (50% yuqori natijalar uchun)
+                    if (foiz >= 50)
+                    {
+                        var talabaUser = await _context.Foydalanuvchilar.FindAsync(entry.TalabaId);
+                        if (talabaUser != null)
+                        {
+                            // Imtihon uchun tangacha miqdori (masalan, 2000 so'm)
+                            const decimal imtihonTangachaMiqdori = 2000m;
+                            decimal qoshiladiganTangacha = imtihonTangachaMiqdori * foiz / 100;
+                            
+                            talabaUser.Tangacha += qoshiladiganTangacha;
+                            talabaUser.YangilanganVaqt = now;
+                        }
+                    }
+
                     // Sertifikat yaratish: faqat online/offline imtihon sertifikatli bo'lsa va talaba o'tgan bo'lsa
                     if (imtihon.SertifikatBeriladimi && otdimi)
                     {
@@ -1427,6 +1442,22 @@ namespace talim_platforma.Controllers
 
                 _context.ImtihonNatijalar.Add(natija);
                 await _context.SaveChangesAsync();
+
+                // Tangacha qo'shish (50% yuqori natijalar uchun)
+                if (foiz >= 50)
+                {
+                    var talabaUser = await _context.Foydalanuvchilar.FindAsync(talabaId.Value);
+                    if (talabaUser != null)
+                    {
+                        // Imtihon uchun tangacha miqdori (masalan, 2000 so'm)
+                        const decimal imtihonTangachaMiqdori = 2000m;
+                        decimal qoshiladiganTangacha = imtihonTangachaMiqdori * foiz / 100;
+                        
+                        talabaUser.Tangacha += qoshiladiganTangacha;
+                        talabaUser.YangilanganVaqt = DateTime.Now;
+                        await _context.SaveChangesAsync();
+                    }
+                }
 
                 // Agar o'tgan bo'lsa va sertifikat beriladimi bo'lsa
                 if (otdimi && imtihon.SertifikatBeriladimi)

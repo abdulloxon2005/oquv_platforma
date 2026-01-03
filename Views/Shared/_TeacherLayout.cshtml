@@ -33,7 +33,8 @@
         <!-- Left Sidebar -->
         <div class="w-64 bg-white border-r border-gray-200 fixed h-screen overflow-y-auto shadow-sm">
             <!-- Logo -->
-            <div class="p-6 border-b border-gray-200">
+            <div class="p-6 border-b border-gray-200 flex items-center">
+                <img src="~/icons_talim/icons.png" alt="Ta'lim Plus" style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
                 <h1 class="text-lg font-bold text-gray-800">Talim Plus · Teacher</h1>
             </div>
 
@@ -99,9 +100,6 @@
 
             <!-- Page Content -->
             <main class="p-6 space-y-4">
-                <div>
-                    @await Component.InvokeAsync("Ads", new { target = "teacher" })
-                </div>
                 @RenderBody()
             </main>
         </div>

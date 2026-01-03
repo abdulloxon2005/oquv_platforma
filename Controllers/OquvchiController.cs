@@ -3,6 +3,8 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -85,6 +87,16 @@ public class OquvchiController : Controller
             .Take(6)
             .ToListAsync();
 
+        // Baholarni olish
+        var baholar = await _context.Baholar
+            .Include(b => b.Dars)
+                .ThenInclude(d => d.Guruh)
+                    .ThenInclude(g => g.Kurs)
+            .Where(b => b.TalabaId == talabaId)
+            .OrderByDescending(b => b.YaratilganVaqt)
+            .Take(10)
+            .ToListAsync();
+
         var attendanceLookup = await _context.Davomatlar
             .Where(d => d.TalabaId == talabaId && guruhIds.Contains(d.GuruhId))
             .Select(d => new { d.GuruhId, Sana = d.Sana.Date, d.Holati })
@@ -105,6 +117,9 @@ public class OquvchiController : Controller
             .Take(6)
             .ToListAsync();
 
+        // Tangacha miqdorini olish
+        var tangacha = talaba?.Tangacha ?? 0m;
+
         var model = new StudentDashboardViewModel
         {
             FullName = ViewBag.FullName as string ?? string.Empty,
@@ -114,6 +129,7 @@ public class OquvchiController : Controller
             Qarzdorlik = barchaTolovlar.Sum(t => t.Qarzdorlik),
             Haqdorlik = barchaTolovlar.Sum(t => t.Haqdorlik),
             OxirgiFoiz = natijalar.FirstOrDefault()?.FoizNatija,
+            Tangacha = tangacha,
             Tolovlar = tolovlar.Select(t => new StudentPaymentItem
             {
                 Sana = t.Sana,
@@ -180,7 +196,15 @@ public class OquvchiController : Controller
                     Nomi = g.First().Kurs!.Nomi,
                     Holati = ResolveTolovStatus(latestTolovByKurs.TryGetValue(g.Key, out var lt) ? lt : null, g.First().Holati),
                     Narx = g.First().Kurs!.Narxi
-                }).ToList()
+                }).ToList(),
+            Baholar = baholar.Select(b => new StudentBahoItem
+            {
+                Sana = b.Dars?.Sana ?? b.YaratilganVaqt,
+                Baho = b.Ball,
+                KursNomi = b.Dars?.Guruh?.Kurs?.Nomi ?? "Kurs",
+                GuruhNomi = b.Dars?.Guruh?.Nomi ?? "Guruh",
+                Mavzu = b.Dars?.Mavzu ?? "Dars"
+            }).ToList()
         };
 
         return View(model);
@@ -299,6 +323,27 @@ public class OquvchiController : Controller
         }
 
         var talaba = await _context.Foydalanuvchilar.FirstOrDefaultAsync(f => f.Id == talabaId);
+        
+        // Arxivlangan foydalanuvchini tekshirish
+        if (talaba != null && talaba.Arxivlanganmi && talaba.ArxivlanganSana.HasValue)
+        {
+            var kunlarOtdi = (DateTime.Now - talaba.ArxivlanganSana.Value).Days;
+            
+            // 1 oydan (30 kun) keyin kirishni bloklash
+            if (kunlarOtdi >= 30)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Clear();
+                TempData["ErrorMessage"] = "Sizning hisobingiz arxivlangan va 1 oy o'tgan. Kirish imkoni yo'q.";
+                return null;
+            }
+            
+            // 1 oy ichida bo'lsa, faqat o'z ma'lumotlarini ko'ra oladi
+            ViewBag.Arxivlanganmi = true;
+            ViewBag.ArxivlanganSana = talaba.ArxivlanganSana.Value;
+            ViewBag.KunlarOtdi = kunlarOtdi;
+        }
+        
         var fullName = $"{talaba?.Ism} {talaba?.Familiya}".Trim();
         if (string.IsNullOrWhiteSpace(fullName))
         {

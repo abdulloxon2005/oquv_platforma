@@ -1,0 +1,107 @@
+@model List<talim_platforma.Models.Foydalanuvchi>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Arxivlangan foydalanuvchilar";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-1">📦 Arxivlangan foydalanuvchilar</h2>
+        <p class="text-muted small mb-0">O'quv markazni tark etgan foydalanuvchilar</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-1"></i> Dashboard
+    </a>
+</div>
+
+<form asp-action="Arxivlanganlar" method="get" class="mb-3 row g-2">
+    <div class="col-md-4">
+        <input type="text" name="q" class="form-control" placeholder="Ism, familiya yoki login..." value="@ViewBag.QidirilganIsm" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">
+            <i class="fas fa-search me-1"></i> Qidirish
+        </button>
+    </div>
+</form>
+
+@if (TempData["xabar"] != null)
+{
+    <div class="alert alert-success py-2 px-3 small">@TempData["xabar"]</div>
+}
+
+<div class="table-responsive mt-3">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>F.I.Sh</th>
+                <th>Telefon</th>
+                <th>Login</th>
+                <th>Rol</th>
+                <th>Arxivlangan sana</th>
+                <th class="text-end">Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                var index = 1;
+                foreach (var item in Model)
+                {
+                    var fullName = $"{item.Familiya} {item.Ism}";
+                    var roleLower = (item.Rol ?? "").Trim().ToLower();
+                    var roleClass = roleLower switch
+                    {
+                        "admin" => "badge-role badge-role-admin",
+                        "teacher" or "oqituvchi" => "badge-role badge-role-teacher",
+                        "student" or "talaba" or "oquvchi" => "badge-role badge-role-student",
+                        _ => "badge-role badge-role-user"
+                    };
+                    var arxivlanganSana = item.ArxivlanganSana?.ToString("dd.MM.yyyy HH:mm") ?? "Noma'lum";
+                    var kunlarOtdi = item.ArxivlanganSana.HasValue 
+                        ? (DateTime.Now - item.ArxivlanganSana.Value).Days 
+                        : 0;
+                    <tr class="table-secondary opacity-75">
+                        <td>@index</td>
+                        <td>
+                            <div class="fw-semibold">@fullName</div>
+                            <div class="text-muted small">@item.OtasiningIsmi</div>
+                        </td>
+                        <td class="text-nowrap">@item.TelefonRaqam</td>
+                        <td>@item.Login</td>
+                        <td>
+                            <span class="@roleClass text-capitalize">
+                                @item.Rol
+                            </span>
+                        </td>
+                        <td>
+                            <div>@arxivlanganSana</div>
+                            <small class="text-muted">@kunlarOtdi kun oldin</small>
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <form asp-action="FoydalanuvchiArxivdanOchish" asp-route-id="@item.Id" method="post" style="display: inline;" onsubmit="return confirm('Haqiqatan ham arxivdan ochmoqchimisiz?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Arxivdan ochish">
+                                    <i class="fas fa-box-open"></i> Arxivdan ochish
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    index++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        Hozircha arxivlangan foydalanuvchilar mavjud emas.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+

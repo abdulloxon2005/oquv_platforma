@@ -48,6 +48,18 @@ public class StudentApiController : ControllerBase
             return Unauthorized(new { message = "Login yoki parol noto‘g‘ri." });
         }
 
+        // Arxivlangan foydalanuvchini tekshirish
+        if (user.Arxivlanganmi && user.ArxivlanganSana.HasValue)
+        {
+            var kunlarOtdi = (DateTime.Now - user.ArxivlanganSana.Value).Days;
+            
+            // 1 oydan (30 kun) keyin kirishni bloklash
+            if (kunlarOtdi >= 30)
+            {
+                return Unauthorized(new { message = "Sizning hisobingiz arxivlangan va 1 oy o'tgan. Kirish imkoni yo'q." });
+            }
+        }
+
         var verified = _passwordHasher.VerifyHashedPassword(user, user.Parol, request.Parol.Trim());
         if (verified == PasswordVerificationResult.Failed)
         {
@@ -302,6 +314,70 @@ public class StudentApiController : ControllerBase
         }));
     }
 
+    // 📊 Baholar ro'yxati
+    [HttpGet("grades")]
+    [Authorize(Roles = "student")]
+    public async Task<IActionResult> Grades()
+    {
+        var ctx = await GetStudentContextAsync();
+        if (ctx == null) return Unauthorized();
+        var talabaId = ctx.Value.talabaId;
+
+        var baholar = await _context.Baholar
+            .Include(b => b.Dars)
+                .ThenInclude(d => d.Guruh)
+                    .ThenInclude(g => g.Kurs)
+            .Where(b => b.TalabaId == talabaId)
+            .OrderByDescending(b => b.YaratilganVaqt)
+            .ToListAsync();
+
+        return Ok(baholar.Select(b => new
+        {
+            b.Id,
+            Sana = b.Dars?.Sana ?? b.YaratilganVaqt,
+            Baho = b.Ball,
+            KursNomi = b.Dars?.Guruh?.Kurs?.Nomi ?? "Kurs",
+            GuruhNomi = b.Dars?.Guruh?.Nomi ?? "Guruh",
+            Mavzu = b.Dars?.Mavzu ?? "Dars",
+            Izoh = b.Izoh,
+            YaratilganVaqt = b.YaratilganVaqt
+        }));
+    }
+
+    // 📋 Imtihon natijalari ro'yxati
+    [HttpGet("results")]
+    [Authorize(Roles = "student")]
+    public async Task<IActionResult> Results()
+    {
+        var ctx = await GetStudentContextAsync();
+        if (ctx == null) return Unauthorized();
+        var talabaId = ctx.Value.talabaId;
+
+        var natijalar = await _context.ImtihonNatijalar
+            .Include(n => n.Imtihon)
+                .ThenInclude(i => i.Guruh)
+                    .ThenInclude(g => g.Kurs)
+            .Where(n => n.TalabaId == talabaId)
+            .OrderByDescending(n => n.Sana)
+            .ToListAsync();
+
+        return Ok(natijalar.Select(n => new
+        {
+            n.Id,
+            ImtihonId = n.ImtihonId,
+            ImtihonNomi = n.Imtihon?.Nomi ?? "Imtihon",
+            Guruh = n.Imtihon?.Guruh?.Nomi ?? "-",
+            Kurs = n.Imtihon?.Guruh?.Kurs?.Nomi ?? "-",
+            n.Sana,
+            n.UmumiyBall,
+            n.MaksimalBall,
+            n.FoizNatija,
+            n.Otdimi,
+            n.BoshlanishVaqti,
+            n.TugashVaqti
+        }));
+    }
+
     // 🧪 Online imtihonlar ro'yxati
     [HttpGet("exams/online")]
     [Authorize(Roles = "student")]
@@ -459,6 +535,22 @@ public class StudentApiController : ControllerBase
 
         _context.ImtihonNatijalar.Add(natija);
         await _context.SaveChangesAsync();
+
+        // Tangacha qo'shish (50% yuqori natijalar uchun)
+        if (foiz >= 50)
+        {
+            var talabaUser = await _context.Foydalanuvchilar.FindAsync(talabaId);
+            if (talabaUser != null)
+            {
+                // Imtihon uchun tangacha miqdori (masalan, 2000 so'm)
+                const decimal imtihonTangachaMiqdori = 2000m;
+                decimal qoshiladiganTangacha = imtihonTangachaMiqdori * foiz / 100;
+                
+                talabaUser.Tangacha += qoshiladiganTangacha;
+                talabaUser.YangilanganVaqt = DateTime.Now;
+                await _context.SaveChangesAsync();
+            }
+        }
 
         if (otdimi && imtihon.SertifikatBeriladimi)
         {

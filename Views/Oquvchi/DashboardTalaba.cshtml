@@ -5,6 +5,11 @@
 }
 
 <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Reklama qismi -->
+    <div class="w-full">
+        @await Component.InvokeAsync("Ads", new { target = "student" })
+    </div>
+    
     <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <p class="text-sm text-gray-500">Assalomu alaykum</p>
@@ -23,7 +28,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         <div class="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm">
             <p class="text-sm text-gray-500">Faol guruhlar</p>
             <p class="mt-2 text-3xl font-bold text-blue-600">@Model.FaolGuruhlar</p>
@@ -41,6 +46,11 @@
             <p class="mt-2 text-3xl font-bold text-amber-600">
                 @(Model.OxirgiFoiz.HasValue ? $"{Model.OxirgiFoiz:F1}%" : "-")
             </p>
+        </div>
+        <div class="bg-white border border-purple-100 rounded-2xl p-5 shadow-sm">
+            <p class="text-sm text-gray-500">💰 Tangacha</p>
+            <p class="mt-2 text-3xl font-bold text-purple-600">@Model.Tangacha.ToString("N0")</p>
+            <p class="text-xs text-gray-400 mt-1">so'm</p>
         </div>
     </div>
 
@@ -227,37 +237,81 @@
         </div>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4" id="natijalar">
-        <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-800">Imtihon natijalari</h2>
-            <a asp-controller="Imtihon" asp-action="Sertifikatlar" class="text-sm text-blue-600 hover:text-blue-700">Barchasini ko‘rish</a>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4" id="natijalar">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-800">Imtihon natijalari</h2>
+                <a asp-controller="Imtihon" asp-action="Sertifikatlar" class="text-sm text-blue-600 hover:text-blue-700">Barchasini ko'rish</a>
+            </div>
+            @if (Model.Natijalar.Any())
+            {
+                <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    @foreach (var item in Model.Natijalar)
+                    {
+                        <div class="border border-gray-100 rounded-xl p-4 space-y-1">
+                            <p class="text-sm text-gray-500">@item.Guruh</p>
+                            <p class="font-semibold text-gray-800">@item.ImtihonNomi</p>
+                            <p class="text-xs text-gray-500">@item.Sana.ToString("dd MMM, yyyy")</p>
+                            <p class="text-sm font-medium @(item.Otdimi ? "text-green-600" : "text-red-500")">
+                                @item.Foiz.ToString("F1")% · @(item.Otdimi ? "O'tdi" : "O'tmadi")
+                            </p>
+                            <a asp-controller="Imtihon" asp-action="NatijaTafsilot" asp-route-natijaId="@item.NatijaId"
+                               class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                                Tafsilot
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-gray-500 py-8 border border-dashed rounded-xl">
+                    Hozircha imtihon natijalari mavjud emas.
+                </div>
+            }
         </div>
-        @if (Model.Natijalar.Any())
-        {
-            <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                @foreach (var item in Model.Natijalar)
-                {
-                    <div class="border border-gray-100 rounded-xl p-4 space-y-1">
-                        <p class="text-sm text-gray-500">@item.Guruh</p>
-                        <p class="font-semibold text-gray-800">@item.ImtihonNomi</p>
-                        <p class="text-xs text-gray-500">@item.Sana.ToString("dd MMM, yyyy")</p>
-                        <p class="text-sm font-medium @(item.Otdimi ? "text-green-600" : "text-red-500")">
-                            @item.Foiz.ToString("F1")% · @(item.Otdimi ? "O'tdi" : "O'tmadi")
-                        </p>
-                        <a asp-controller="Imtihon" asp-action="NatijaTafsilot" asp-route-natijaId="@item.NatijaId"
-                           class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
-                            Tafsilot
-                        </a>
-                    </div>
-                }
+
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-4" id="baholar">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-800">📊 Dars baholari</h2>
+                <span class="text-sm text-gray-500">@Model.Baholar.Count ta baho</span>
             </div>
-        }
-        else
-        {
-            <div class="text-center text-gray-500 py-8 border border-dashed rounded-xl">
-                Hozircha imtihon natijalari mavjud emas.
-            </div>
-        }
+            @if (Model.Baholar.Any())
+            {
+                <div class="space-y-3">
+                    @foreach (var baho in Model.Baholar)
+                    {
+                        var bahoRang = baho.Baho switch
+                        {
+                            >= 90 => "text-green-600",
+                            >= 70 => "text-blue-600",
+                            >= 50 => "text-amber-600",
+                            _ => "text-red-600"
+                        };
+                        <div class="border border-gray-100 rounded-xl p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">@baho.KursNomi</p>
+                                    <p class="font-semibold text-gray-800">@baho.GuruhNomi</p>
+                                    <p class="text-xs text-gray-500">@baho.Sana.ToString("dd MMM, yyyy")</p>
+                                    <p class="text-xs text-gray-400 mt-1">@baho.Mavzu</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-bold @bahoRang">@baho.Baho%</p>
+                                    <p class="text-xs text-gray-500">Baho</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-gray-500 py-8 border border-dashed rounded-xl">
+                    Hozircha baholar mavjud emas.
+                </div>
+            }
+        </div>
     </div>
 </div>
 

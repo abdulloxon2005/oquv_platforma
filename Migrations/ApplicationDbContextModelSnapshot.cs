@@ -98,6 +98,66 @@ namespace talim_platforma.Migrations
                     b.ToTable("Baholar");
                 });
 
+            modelBuilder.Entity("talim_platforma.Models.Course", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImagePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("talim_platforma.Models.CourseEnrollment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("EnrolledAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TalabaId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("TalabaId");
+
+                    b.ToTable("CourseEnrollments");
+                });
+
             modelBuilder.Entity("talim_platforma.Models.Dars", b =>
                 {
                     b.Property<int>("Id")
@@ -145,6 +205,9 @@ namespace talim_platforma.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("BahoFoiz")
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("DarsId")
                         .HasColumnType("INTEGER");
@@ -221,6 +284,9 @@ namespace talim_platforma.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime?>("ArxivlanganSana")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ChatId")
                         .HasColumnType("TEXT");
 
@@ -250,6 +316,9 @@ namespace talim_platforma.Migrations
                     b.Property<string>("Rol")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Tangacha")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("TelefonRaqam")
                         .IsRequired()
@@ -441,9 +510,6 @@ namespace talim_platforma.Migrations
                     b.Property<int>("ImtihonId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ImtihonId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Izoh")
                         .HasColumnType("TEXT");
 
@@ -477,8 +543,6 @@ namespace talim_platforma.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ImtihonId");
-
-                    b.HasIndex("ImtihonId1");
 
                     b.HasIndex("TalabaId");
 
@@ -544,8 +608,18 @@ namespace talim_platforma.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Davomiyligi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Faol")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("FoydalanuvchiId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Kategoriya")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("Narxi")
                         .HasColumnType("TEXT");
@@ -569,6 +643,46 @@ namespace talim_platforma.Migrations
                     b.HasIndex("FoydalanuvchiId");
 
                     b.ToTable("Kurslar");
+                });
+
+            modelBuilder.Entity("talim_platforma.Models.KursApplication", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Familiya")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Faol")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Ism")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Izoh")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("KursId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Sana")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Telefon")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KursId");
+
+                    b.ToTable("KursApplications");
                 });
 
             modelBuilder.Entity("talim_platforma.Models.Qurilma", b =>
@@ -711,9 +825,6 @@ namespace talim_platforma.Migrations
                     b.Property<int>("KursId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("KursId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("QoshilganSana")
                         .HasColumnType("TEXT");
 
@@ -731,8 +842,6 @@ namespace talim_platforma.Migrations
                     b.HasIndex("FoydalanuvchiId");
 
                     b.HasIndex("KursId");
-
-                    b.HasIndex("KursId1");
 
                     b.HasIndex("TalabaId");
 
@@ -813,6 +922,25 @@ namespace talim_platforma.Migrations
                     b.Navigation("Dars");
 
                     b.Navigation("Imtihon");
+
+                    b.Navigation("Talaba");
+                });
+
+            modelBuilder.Entity("talim_platforma.Models.CourseEnrollment", b =>
+                {
+                    b.HasOne("talim_platforma.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("talim_platforma.Models.Foydalanuvchi", "Talaba")
+                        .WithMany()
+                        .HasForeignKey("TalabaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("Talaba");
                 });
@@ -946,14 +1074,10 @@ namespace talim_platforma.Migrations
             modelBuilder.Entity("talim_platforma.Models.ImtihonNatija", b =>
                 {
                     b.HasOne("talim_platforma.Models.Imtihon", "Imtihon")
-                        .WithMany()
+                        .WithMany("Natijalar")
                         .HasForeignKey("ImtihonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("talim_platforma.Models.Imtihon", null)
-                        .WithMany("Natijalar")
-                        .HasForeignKey("ImtihonId1");
 
                     b.HasOne("talim_platforma.Models.Foydalanuvchi", "Talaba")
                         .WithMany()
@@ -982,6 +1106,15 @@ namespace talim_platforma.Migrations
                     b.HasOne("talim_platforma.Models.Foydalanuvchi", null)
                         .WithMany("Kurs")
                         .HasForeignKey("FoydalanuvchiId");
+                });
+
+            modelBuilder.Entity("talim_platforma.Models.KursApplication", b =>
+                {
+                    b.HasOne("talim_platforma.Models.Kurs", "Kurs")
+                        .WithMany()
+                        .HasForeignKey("KursId");
+
+                    b.Navigation("Kurs");
                 });
 
             modelBuilder.Entity("talim_platforma.Models.Qurilma", b =>
@@ -1048,14 +1181,10 @@ namespace talim_platforma.Migrations
                         .HasForeignKey("FoydalanuvchiId");
 
                     b.HasOne("talim_platforma.Models.Kurs", "Kurs")
-                        .WithMany()
+                        .WithMany("TalabaKurslar")
                         .HasForeignKey("KursId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("talim_platforma.Models.Kurs", null)
-                        .WithMany("TalabaKurslar")
-                        .HasForeignKey("KursId1");
 
                     b.HasOne("talim_platforma.Models.Foydalanuvchi", "Talaba")
                         .WithMany()

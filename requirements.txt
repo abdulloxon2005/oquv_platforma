@@ -1,0 +1,19 @@
+Проект "talim_platforma" содержит следующие ссылки на пакеты
+   [net8.0]: 
+   Пакет верхнего уровня                                Запрошено        Разрешено     
+   > BCrypt.Net-Next                                    4.0.3            4.0.3         
+   > DocumentFormat.OpenXml                             3.0.2            3.0.2         
+   > FirebaseAdmin                                      2.4.0            2.4.0         
+   > Google.Apis.Auth                                   1.68.0           1.68.0        
+   > iTextSharp.LGPLv2.Core                             3.7.7            3.7.7         
+   > Microsoft.AspNetCore.Authentication.JwtBearer      8.0.0            8.0.0         
+   > Microsoft.AspNetCore.Identity                      2.3.1            2.3.1         
+   > Microsoft.EntityFrameworkCore                      9.0.10           9.0.10        
+   > Microsoft.EntityFrameworkCore.Design               9.0.10           9.0.10        
+   > Microsoft.EntityFrameworkCore.Sqlite               9.0.10           9.0.10        
+   > Microsoft.EntityFrameworkCore.SqlServer            9.0.7            9.0.7         
+   > Microsoft.EntityFrameworkCore.Tools                9.0.10           9.0.10        
+   > System.IdentityModel.Tokens.Jwt                    8.2.1            8.2.1         
+   > Telegram.Bot                                       22.1.4           22.2.0        
+   > UglyToad.PdfPig                                    1.7.0-custom-5   1.7.0-custom-5
+

@@ -29,6 +29,10 @@ namespace talim_platforma.Models
         // 🗒 Izoh (ixtiyoriy)
         public string? Izoh { get; set; }
 
+        // 📊 Baho foizi (faqat "Keldi" holatidagi o'quvchilar uchun): 10, 20, 30... 100
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? BahoFoiz { get; set; }
+
         // ⏱ Yaratilgan va yangilangan vaqtlar
         public DateTime YaratilganVaqt { get; set; } = DateTime.Now;
         public DateTime YangilanganVaqt { get; set; } = DateTime.Now;

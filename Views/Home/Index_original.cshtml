@@ -1,0 +1,251 @@
+@{
+    ViewData["Title"] = "Talim Plus";
+}
+
+<!-- HERO SECTION -->
+<div class="hero text-white rounded-3xl p-16 md:p-24 mt-8 mb-16 relative overflow-hidden fade-in">
+    <div class="relative z-10 max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div class="slide-up">
+                <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                    Kelajak bu yerda <br>boshlanadi
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 text-blue-100 font-medium max-w-lg">
+                    Zamonaviy IT va til kurslari bilan o'z bilimingizni rivojlantiring.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="/Courses" class="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-lg">
+                        Kurslarga yozilish
+                    </a>
+                    <a href="#courses" class="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-blue-600 transition-all">
+                        Batafsil
+                    </a>
+                </div>
+            </div>
+            <div class="flex justify-center">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-white/10 rounded-3xl blur-3xl"></div>
+                    <img src="/images/education.png" alt="education banner" class="relative z-10 w-full max-w-md">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REKLAMA SECTION -->
+<div class="mb-16">
+    @await Component.InvokeAsync("Ads", new { target = "home" })
+</div>
+
+<!-- KURSLAR SECTION -->
+<div id="courses" class="mb-16">
+    @await Component.InvokeAsync("Courses")
+</div>
+
+
+<!-- WHY US SECTION -->
+<div class="max-w-6xl mx-auto bg-white rounded-3xl p-8 md:p-16 shadow-xl mb-16">
+    <div class="text-center mb-16 fade-in">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-blue-600">Nega aynan biz?</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Biz sizning muvaffaqiyatingiz uchun eng yaxshi sharoitlarni yaratdik
+        </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center group">
+            <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                <span class="text-3xl">🎓</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">Professional ustozlar</h3>
+            <p class="text-gray-600 text-lg leading-relaxed">Ko'p yillik tajribaga ega malakali o'qituvchilar sizni eng yuqori natijalarga yetaklaydi.</p>
+        </div>
+        
+        <div class="text-center group">
+            <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                <span class="text-3xl">🕒</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">Moslashuvchan darslar</h3>
+            <p class="text-gray-600 text-lg leading-relaxed">Online va offline darslar jadvali sizga mos tarzda, qulay vaqtda o'qing.</p>
+        </div>
+
+        <div class="text-center group">
+            <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                <span class="text-3xl">📚</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">Zamonaviy metodika</h3>
+            <p class="text-gray-600 text-lg leading-relaxed">Amaliy darslar, real loyihalar va interaktiv mashg'ulotlar bilan samarali o'rganing.</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- STATISTICS SECTION -->
+<div class="max-w-6xl mx-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-8 md:p-16 mb-16">
+    <div class="text-center mb-12 fade-in">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-blue-600">Bizning raqamlar</h2>
+        <p class="text-xl text-gray-600">Natijalar gapiradi</p>
+    </div>
+    <div class="grid md:grid-cols-4 gap-8">
+        <div class="text-center group">
+            <div class="text-5xl font-bold text-blue-600 mb-2">1500+</div>
+            <p class="text-gray-800 font-semibold text-lg">Bitiruvchilar</p>
+        </div>
+        <div class="text-center group">
+            <div class="text-5xl font-bold text-blue-600 mb-2">20+</div>
+            <p class="text-gray-800 font-semibold text-lg">Kurslar</p>
+        </div>
+        <div class="text-center group">
+            <div class="text-5xl font-bold text-blue-600 mb-2">5 yil</div>
+            <p class="text-gray-800 font-semibold text-lg">Tajriba</p>
+        </div>
+        <div class="text-center group">
+            <div class="text-5xl font-bold text-blue-600 mb-2">98%</div>
+            <p class="text-gray-800 font-semibold text-lg">Muvaffaqiyat</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- POPULAR COURSES SECTION -->
+<div class="max-w-6xl mx-auto mb-16">
+    <div class="text-center mb-16 fade-in">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-blue-600">Mashhur kurslar</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Eng talabgir va samarali kurslarimiz bilan tanishing
+        </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-2xl overflow-hidden shadow-lg group hover:shadow-2xl transition-all duration-300">
+            <div class="relative overflow-hidden h-48">
+                <img src="/images/course1.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                <div class="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold">
+                    Trend
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="font-bold text-2xl mb-4 text-gray-800">Frontend dasturlash</h3>
+                <p class="text-gray-600 mb-6 text-lg leading-relaxed">HTML, CSS, JavaScript, React bo'yicha amaliy kurs.</p>
+                <div class="flex items-center justify-between">
+                    <a href="/Courses/Frontend" class="text-blue-600 font-bold text-lg hover:text-blue-800 transition-colors">Batafsil →</a>
+                    <div class="flex items-center text-yellow-500">
+                        ⭐⭐⭐⭐⭐
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl overflow-hidden shadow-lg group hover:shadow-2xl transition-all duration-300">
+            <div class="relative overflow-hidden h-48">
+                <img src="/images/course2.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                <div class="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold">
+                    Popular
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="font-bold text-2xl mb-4 text-gray-800">Ingliz tili</h3>
+                <p class="text-gray-600 mb-6 text-lg leading-relaxed">Zero dan IELTSgacha bosqichma-bosqich o'qitish.</p>
+                <div class="flex items-center justify-between">
+                    <a href="/Courses/English" class="text-blue-600 font-bold text-lg hover:text-blue-800 transition-colors">Batafsil →</a>
+                    <div class="flex items-center text-yellow-500">
+                        ⭐⭐⭐⭐⭐
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl overflow-hidden shadow-lg group hover:shadow-2xl transition-all duration-300">
+            <div class="relative overflow-hidden h-48">
+                <img src="/images/course3.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                <div class="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold">
+                    New
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="font-bold text-2xl mb-4 text-gray-800">Python asoslari</h3>
+                <p class="text-gray-600 mb-6 text-lg leading-relaxed">Dasturlashga kirish va real loyihalar bilan o'rganish.</p>
+                <div class="flex items-center justify-between">
+                    <a href="/Courses/Python" class="text-blue-600 font-bold text-lg hover:text-blue-800 transition-colors">Batafsil →</a>
+                    <div class="flex items-center text-yellow-500">
+                        ⭐⭐⭐⭐⭐
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- STUDENT REVIEWS SECTION -->
+<div class="max-w-6xl mx-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-8 md:p-16 mb-16">
+    <div class="text-center mb-16 fade-in">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-blue-600">O'quvchilar fikrlari</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Bitiruvchilarimizning haqiqiy tajribalari
+        </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-2xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    AQ
+                </div>
+                <div class="ml-4">
+                    <h4 class="font-bold text-xl text-gray-800">Aziza Q.</h4>
+                    <div class="flex text-yellow-500">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+            <p class="text-gray-700 italic text-lg leading-relaxed">"Ustozlarning tushuntirish uslubi zo'r, darslar juda qiziqarli! Hech qachon bunday samarali o'qimagandim."</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    JS
+                </div>
+                <div class="ml-4">
+                    <h4 class="font-bold text-xl text-gray-800">Javohir S.</h4>
+                    <div class="flex text-yellow-500">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+            <p class="text-gray-700 italic text-lg leading-relaxed">"Frontend kursini bitirib hozir firmada ishlayapman. Kurs davomida real loyihalar qildik, bu juda yordam berdi."</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 shadow-lg">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    MX
+                </div>
+                <div class="ml-4">
+                    <h4 class="font-bold text-xl text-gray-800">Madina X.</h4>
+                    <div class="flex text-yellow-500">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+            <p class="text-gray-700 italic text-lg leading-relaxed">"IELTS uchun tayyorlandim va 6.5 oldim, rahmat! Ustozlar juda malakali va individual yondashuvdi."</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- CTA SECTION -->
+<div class="hero text-white py-20 rounded-3xl mb-12 relative overflow-hidden fade-in">
+    <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        <h2 class="text-4xl md:text-6xl font-bold mb-6">O'qishni bugundan boshlang!</h2>
+        <p class="text-xl md:text-2xl mb-10 text-blue-100">
+            Eng yaxshi kurslarga hoziroq ro'yxatdan o'ting va kelajakingizni quring
+        </p>
+        <div class="flex flex-col sm:flex-row gap-6 justify-center">
+            <a href="/Auth/Register" class="bg-white text-blue-600 px-10 py-5 rounded-full font-bold text-xl hover:scale-105 transition-transform shadow-lg">
+                Ro'yxatdan o'tish
+            </a>
+            <a href="/Courses" class="border-2 border-white text-white px-10 py-5 rounded-full font-bold text-xl hover:bg-white hover:text-blue-600 transition-all">
+                Kurslarni ko'rish
+            </a>
+        </div>
+    </div>
+</div>

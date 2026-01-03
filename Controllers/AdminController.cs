@@ -14,6 +14,7 @@ using talim_platforma.Helpers;
 namespace talim_platforma.Controllers
 {
     [Authorize(Roles = "admin")]
+    [AutoValidateAntiforgeryToken]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -32,12 +33,19 @@ namespace talim_platforma.Controllers
             var today = DateTime.Today;
             var monthStart = new DateTime(today.Year, today.Month, 1);
 
+            var arxivlanganlar = _context.Foydalanuvchilar
+                .Where(f => f.ArxivlanganSana.HasValue)
+                .OrderByDescending(f => f.ArxivlanganSana)
+                .Take(10)
+                .ToList();
+
             var model = new AdminDashboardViewModel
             {
                 TotalStudents = foydalanuvchilar.Count(f => RoleHelper.IsStudent(f.Rol)),
                 TotalTeachers = foydalanuvchilar.Count(f => RoleHelper.IsTeacher(f.Rol)),
                 TotalCourses = _context.Kurslar.Count(),
                 ActiveGroups = _context.Guruhlar.Count(g => g.Holati == "Faol"),
+                KursApplicationsCount = _context.KursApplications.Count(a => a.Faol),
                 TodaysIncome = _context.Tolovlar.Where(t => t.Sana.Date == today).Sum(t => (decimal?)t.Miqdor) ?? 0,
                 MonthlyIncome = _context.Tolovlar.Where(t => t.Sana >= monthStart && t.Sana <= today).Sum(t => (decimal?)t.Miqdor) ?? 0,
                 UpcomingExams = _context.Imtihonlar.Count(i => i.Sana >= today),
@@ -51,10 +59,29 @@ namespace talim_platforma.Controllers
                     .Include(g => g.Kurs)
                     .OrderByDescending(g => g.YaratilganVaqt)
                     .Take(4)
+                    .ToList(),
+                RecentKursApplications = _context.KursApplications
+                    .Include(a => a.Kurs)
+                    .Where(a => a.Faol)
+                    .OrderByDescending(a => a.Sana)
+                    .Take(5)
                     .ToList()
             };
 
+            ViewBag.Arxivlanganlar = arxivlanganlar;
             return View(model);
+        }
+
+        // 📝 Kursga yozilganlar ro'yxati
+        public async Task<IActionResult> KursApplications()
+        {
+            var applications = await _context.KursApplications
+                .Include(a => a.Kurs)
+                .Where(a => a.Faol)
+                .OrderByDescending(a => a.Sana)
+                .ToListAsync();
+            
+            return View(applications);
         }
 
         // 📋 Imtihon natijalari (admin uchun umumiy ko‘rinish)
@@ -104,7 +131,9 @@ namespace talim_platforma.Controllers
         // 👥 Foydalanuvchilar ro‘yxati
         public IActionResult Foydalanuvchilar(string? q)
         {
-            var query = _context.Foydalanuvchilar.AsQueryable();
+            var query = _context.Foydalanuvchilar
+                .Where(f => !f.ArxivlanganSana.HasValue) // Faqat arxivlanmagan foydalanuvchilar
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(q))
             {
@@ -234,6 +263,88 @@ namespace talim_platforma.Controllers
                 _context.SaveChanges();
             }
             return RedirectToAction("Foydalanuvchilar");
+        }
+
+        // 📦 Foydalanuvchini arxivlash
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FoydalanuvchiArxivlash(int id)
+        {
+            var foydalanuvchi = await _context.Foydalanuvchilar.FindAsync(id);
+            if (foydalanuvchi == null)
+            {
+                TempData["xabar"] = "❌ Foydalanuvchi topilmadi!";
+                return RedirectToAction("Foydalanuvchilar");
+            }
+
+            if (foydalanuvchi.Arxivlanganmi)
+            {
+                TempData["xabar"] = "⚠️ Bu foydalanuvchi allaqachon arxivlangan!";
+                return RedirectToAction("Foydalanuvchilar");
+            }
+
+            foydalanuvchi.ArxivlanganSana = DateTime.Now;
+            foydalanuvchi.Faolmi = false; // Arxivlangan foydalanuvchi faol emas
+            foydalanuvchi.YangilanganVaqt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            TempData["xabar"] = $"✅ {foydalanuvchi.Familiya} {foydalanuvchi.Ism} muvaffaqiyatli arxivlandi!";
+            return RedirectToAction("Foydalanuvchilar");
+        }
+
+        // 📤 Foydalanuvchini arxivdan ochish
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FoydalanuvchiArxivdanOchish(int id)
+        {
+            var foydalanuvchi = await _context.Foydalanuvchilar.FindAsync(id);
+            if (foydalanuvchi == null)
+            {
+                TempData["xabar"] = "❌ Foydalanuvchi topilmadi!";
+                return RedirectToAction("Arxivlanganlar");
+            }
+
+            if (!foydalanuvchi.Arxivlanganmi)
+            {
+                TempData["xabar"] = "⚠️ Bu foydalanuvchi arxivlangan emas!";
+                return RedirectToAction("Arxivlanganlar");
+            }
+
+            foydalanuvchi.ArxivlanganSana = null;
+            foydalanuvchi.Faolmi = true;
+            foydalanuvchi.YangilanganVaqt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            TempData["xabar"] = $"✅ {foydalanuvchi.Familiya} {foydalanuvchi.Ism} arxivdan ochildi!";
+            return RedirectToAction("Arxivlanganlar");
+        }
+
+        // 📋 Arxivlangan foydalanuvchilar ro'yxati
+        public IActionResult Arxivlanganlar(string? q)
+        {
+            var query = _context.Foydalanuvchilar
+                .Where(f => f.ArxivlanganSana.HasValue)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim().ToLower();
+                query = query.Where(f =>
+                    (f.Ism != null && f.Ism.ToLower().Contains(term)) ||
+                    (f.Familiya != null && f.Familiya.ToLower().Contains(term)) ||
+                    (f.Login != null && f.Login.ToLower().Contains(term)) ||
+                    (f.TelefonRaqam != null && f.TelefonRaqam.ToLower().Contains(term)));
+            }
+
+            ViewBag.QidirilganIsm = q;
+
+            var arxivlanganlar = query
+                .OrderByDescending(f => f.ArxivlanganSana)
+                .ThenBy(f => f.Familiya)
+                .ThenBy(f => f.Ism)
+                .ToList();
+
+            return View(arxivlanganlar);
         }
 
         // 📚 Kurslar ro‘yxati

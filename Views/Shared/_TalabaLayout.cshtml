@@ -24,8 +24,9 @@
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         <aside class="w-64 bg-white border-r border-gray-200 fixed h-screen overflow-y-auto shadow-sm">
-            <div class="p-6 border-b border-gray-200">
-                <h1 class="text-lg font-bold text-gray-800">Talim Plus · Talaba</h1>
+            <div class="p-6 text-2xl font-bold border-b border-blue-700 text-center flex items-center justify-center">
+                <img src="~/icons_talim/icons.png" alt="Talaba" class="w-8 h-8 mr-2" />
+                Talaba
             </div>
             <nav class="p-4 space-y-1">
                 <a asp-controller="Oquvchi" asp-action="DashboardTalaba"
@@ -78,9 +79,6 @@
             </header>
 
             <main class="p-6 space-y-4">
-                <div>
-                    @await Component.InvokeAsync("Ads", new { target = "student" })
-                </div>
                 @RenderBody()
             </main>
         </div>

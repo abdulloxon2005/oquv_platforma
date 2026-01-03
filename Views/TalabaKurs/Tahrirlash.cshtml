@@ -1,8 +1,8 @@
-@model talim_platforma.Models.TalabaKursEditViewModel
+@model talim_platforma.Models.TalabaKurs
 
 @{
     Layout = "_AdminLayout";
-    ViewData["Title"] = "Talabani Kurs(lar)ga Tahrirlash";
+    ViewData["Title"] = "Talabani Kursga Tahrirlash";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -18,7 +18,6 @@
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
 
-            <!-- Talaba tanlash -->
             <div class="mb-3">
                 <label class="form-label">Talaba:</label>
                 <select asp-for="TalabaId" asp-items="ViewBag.Talabalar" class="form-select" required>
@@ -26,14 +25,10 @@
                 </select>
             </div>
 
-            <!-- Kurslar tanlash -->
             <div class="mb-3">
-                <label class="form-label">Kurslar (bir nechta tanlash mumkin):</label>
-                <select asp-for="Kurslar" asp-items="ViewBag.Kurslar" multiple class="form-select" size="6" required>
+                <label class="form-label">Kurs:</label>
+                <select asp-for="KursId" asp-items="ViewBag.Kurslar" class="form-select" required>
                 </select>
-                <small class="text-muted d-block mt-1">
-                    Ctrl (yoki Mac’da Cmd) bosib bir nechta kurs tanlang
-                </small>
             </div>
 
             <div class="d-flex gap-2">

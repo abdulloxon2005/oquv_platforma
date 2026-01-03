@@ -19,6 +19,17 @@ namespace talim_platforma.Models.ViewModels
         public List<StudentExamResultItem> Natijalar { get; set; } = new();
         public List<StudentGroupCard> Guruhlar { get; set; } = new();
         public List<StudentCourseItem> Kurslar { get; set; } = new();
+        public decimal Tangacha { get; set; } = 0;
+        public List<StudentBahoItem> Baholar { get; set; } = new();
+    }
+
+    public class StudentBahoItem
+    {
+        public DateTime Sana { get; set; }
+        public int Baho { get; set; } // Foiz (10, 20, 30...100)
+        public string KursNomi { get; set; } = string.Empty;
+        public string GuruhNomi { get; set; } = string.Empty;
+        public string Mavzu { get; set; } = string.Empty;
     }
 
     public class StudentPaymentItem

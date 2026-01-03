@@ -1,0 +1,70 @@
+@model IEnumerable<talim_platforma.Models.Course>
+
+@if (Model != null && Model.Any())
+{
+    <div class="bg-white border border-gray-200 rounded-xl p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Mashhur kurslar</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var course in Model)
+            {
+                <div class="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+                    
+                    @if (!string.IsNullOrWhiteSpace(course.ImagePath))
+                    {
+                        <div class="h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                            <img src="@course.ImagePath" 
+                                 alt="@course.Title" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="h-48 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 00.25 3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-1.05.174v-4.102l1.693-.723a1 1 0 00.555-1.297z"/>
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-gray-500">Kurs rasmi yo'q</p>
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+                            @course.Title
+                        </h3>
+                        
+                        @if (!string.IsNullOrWhiteSpace(course.Description))
+                        {
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-3">
+                                @course.Description
+                            </p>
+                        }
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">
+                                @course.CreatedAt.ToString("dd MMMM, yyyy")
+                            </span>
+                            <button onclick="openModal()" 
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                Kursga yozilish
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<style>
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>

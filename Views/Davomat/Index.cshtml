@@ -9,7 +9,7 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Davomat nazorati</h2>
-        <a asp-action="Create" asp-route-guruhId="@selectedGroup" class="btn btn-primary">➕ Davomat qo‘shish</a>
+        <a asp-action="Create" asp-route-guruhId="@selectedGroup" class="btn btn-primary">➕ Davomat qo'shish</a>
     </div>
 
     <form method="get" class="row g-2 mb-3">
@@ -39,14 +39,14 @@
                     <th>Dars</th>
                     <th>Holati</th>
                     <th>Izoh</th>
-                    <th></th>
+                    <th class="text-end">Amallar</th>
                 </tr>
             </thead>
             <tbody>
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-muted">Hozircha ma'lumot yo‘q.</td>
+                        <td colspan="7" class="text-center text-muted py-4">Hozircha ma'lumot yo'q.</td>
                     </tr>
                 }
                 else
@@ -58,13 +58,32 @@
                             <td>@item.Guruh?.Nomi</td>
                             <td>@item.Talaba?.Ism @item.Talaba?.Familiya</td>
                             <td>@item.Dars?.Mavzu</td>
-                            <td>@item.Holati</td>
+                            <td>
+                                @switch (item.Holati)
+                                {
+                                    case "Keldi":
+                                        <span class="badge bg-success">@item.Holati</span>
+                                        break;
+                                    case "Kelmadi":
+                                        <span class="badge bg-danger">@item.Holati</span>
+                                        break;
+                                    case "Kech keldi":
+                                        <span class="badge bg-warning text-dark">@item.Holati</span>
+                                        break;
+                                    case "Uzrli":
+                                        <span class="badge bg-info">@item.Holati</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@item.Holati</span>
+                                        break;
+                                }
+                            </td>
                             <td>@item.Izoh</td>
                             <td class="text-end">
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">✏️</a>
                                 <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('O‘chirishni tasdiqlaysizmi?')">🗑️</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('O'chirishni tasdiqlaysizmi?')">🗑️</button>
                                 </form>
                             </td>
                         </tr>

@@ -7,6 +7,8 @@ using talim_platforma.Models;
 
 namespace talim_platforma.Controllers
 {
+    [Authorize(Roles = "admin")]
+    [AutoValidateAntiforgeryToken]
     public class TalabaKursController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,7 +18,7 @@ namespace talim_platforma.Controllers
             _context = context;
         }
 
-        // 📋 1. Ro‘yxat (Talaba-Kurs bog‘lanmalari)
+        // 1. Index
         public async Task<IActionResult> Index()
         {
             var boglanmalar = await _context.TalabaKurslar
@@ -27,11 +29,11 @@ namespace talim_platforma.Controllers
             return View(boglanmalar);
         }
 
-        // ➕ 2. Yaratish (GET)
+        // 2. Yaratish (GET)
         public IActionResult Yaratish()
         {
             ViewBag.Talabalar = new SelectList(
-                _context.Foydalanuvchilar.Where(f => f.Rol == "Talaba"), 
+                _context.Foydalanuvchilar.Where(f => f.Rol.ToLower() == "student"),
                 "Id", "Ism");
 
             ViewBag.Kurslar = new MultiSelectList(
@@ -40,17 +42,17 @@ namespace talim_platforma.Controllers
             return View();
         }
 
-        // ➕ 2. Yaratish (POST)
+        // 2. Yaratish (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Yaratish(int talabaId, List<int> kurslar)
         {
-            if (!ModelState.IsValid || kurslar.Count == 0)
+            if (!ModelState.IsValid || kurslar == null || !kurslar.Any())
             {
                 ModelState.AddModelError("", "Kamida bitta kurs tanlanishi kerak.");
 
                 ViewBag.Talabalar = new SelectList(
-                    _context.Foydalanuvchilar.Where(f => f.Rol == "Talaba"), 
+                    _context.Foydalanuvchilar.Where(f => f.Rol.ToLower() == "student"),
                     "Id", "Ism", talabaId);
 
                 ViewBag.Kurslar = new MultiSelectList(
@@ -76,23 +78,33 @@ namespace talim_platforma.Controllers
             }
 
             await _context.SaveChangesAsync();
-
             TempData["xabar"] = "Muvaffaqiyatli saqlandi!";
             return RedirectToAction(nameof(Index));
         }
 
-        // ✏ 3. Tahrirlash (GET)
+        // ✅ Yangi metod: Talabani qidirish (AJAX)
+        [HttpGet]
+        public IActionResult SearchTalaba(string q)
+        {
+            if (string.IsNullOrEmpty(q))
+                return Json(new List<object>());
+
+            var talabalar = _context.Foydalanuvchilar
+                .Where(f => f.Rol.ToLower() == "student" && f.Ism.Contains(q))
+                .Select(f => new { id = f.Id, text = f.Ism })
+                .ToList();
+
+            return Json(talabalar);
+        }
+
+        // 3. Tahrirlash (GET)
         public async Task<IActionResult> Tahrirlash(int id)
         {
-            var tk = await _context.TalabaKurslar
-                .Include(x => x.Talaba)
-                .Include(x => x.Kurs)
-                .FirstOrDefaultAsync(x => x.Id == id);
-
+            var tk = await _context.TalabaKurslar.FindAsync(id);
             if (tk == null) return NotFound();
 
             ViewBag.Talabalar = new SelectList(
-                _context.Foydalanuvchilar.Where(f => f.Rol == "Talaba"),
+                _context.Foydalanuvchilar.Where(f => f.Rol.ToLower() == "student"),
                 "Id", "Ism", tk.TalabaId);
 
             ViewBag.Kurslar = new SelectList(
@@ -101,7 +113,7 @@ namespace talim_platforma.Controllers
             return View(tk);
         }
 
-        // ✏ 3. Tahrirlash (POST)
+        // 3. Tahrirlash (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Tahrirlash(int id, TalabaKurs model)
@@ -111,7 +123,7 @@ namespace talim_platforma.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.Talabalar = new SelectList(
-                    _context.Foydalanuvchilar.Where(f => f.Rol == "Talaba"),
+                    _context.Foydalanuvchilar.Where(f => f.Rol.ToLower() == "student"),
                     "Id", "Ism", model.TalabaId);
 
                 ViewBag.Kurslar = new SelectList(
@@ -128,26 +140,19 @@ namespace talim_platforma.Controllers
             tk.Holati = model.Holati;
 
             await _context.SaveChangesAsync();
-
             TempData["xabar"] = "O‘zgarishlar saqlandi!";
             return RedirectToAction(nameof(Index));
         }
 
-        // ❌ 4. O‘chirish
+        // 4. Ochirish
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Ochirish(int id)
         {
-            var boglanma = await _context.TalabaKurslar
-                .FirstOrDefaultAsync(b => b.Id == id);
+            var boglanma = await _context.TalabaKurslar.FindAsync(id);
+            if (boglanma == null) return NotFound();
 
-            if (boglanma == null)
-                return NotFound();
-
-            // DELETE ERROR FIX ✔
-            // Talaba yoki Kurs mavjud bo‘lsa ham FK xatolik chiqmaydi,
-            // chunki TalabaKurs jadvali Faqat uzini o‘chiryapti.
             _context.TalabaKurslar.Remove(boglanma);
-
             await _context.SaveChangesAsync();
 
             TempData["xabar"] = "Bog‘lanma o‘chirildi!";

@@ -76,6 +76,83 @@
     </div>
 </div>
 
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">📝 Kursga yozilganlar</h5>
+                <a asp-action="KursApplications" class="btn btn-sm btn-primary">
+                    <i class="fas fa-list me-1"></i> Barchasini ko'rish
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <h2 class="mb-0 text-primary">@Model.KursApplicationsCount</h2>
+                        <small class="text-muted">Jami arizalar</small>
+                    </div>
+                    <div class="ms-auto">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                            <i class="fas fa-arrow-up me-1"></i> Yangi arizalar
+                        </span>
+                    </div>
+                </div>
+                @if (Model.RecentKursApplications.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var application in Model.RecentKursApplications)
+                        {
+                            <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">@application.Ism @application.Familiya</div>
+                                    <small class="text-muted">@application.Telefon — @application.Sana.ToString("dd.MM HH:mm")</small>
+                                    @if (application.Kurs != null)
+                                    {
+                                        <div class="small text-primary">@application.Kurs.Nomi</div>
+                                    }
+                                </div>
+                                <span class="badge bg-primary">Yangi</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Hozircha arizalar yo'q</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-0">
+                <h5 class="mb-0">So'nggi to'lovlar</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentPayments.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var payment in Model.RecentPayments)
+                        {
+                            <div class="list-group-item px-0 d-flex justify-content-between">
+                                <div>
+                                    <div class="fw-semibold">@payment.Talaba?.Familiya @payment.Talaba?.Ism</div>
+                                    <small class="text-muted">@payment.Kurs?.Nomi — @payment.Sana.ToString("dd.MM.yyyy HH:mm")</small>
+                                </div>
+                                <span class="fw-semibold text-primary">@payment.Miqdor.ToString("N0") so'm</span>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Hozircha to'lovlar yo'q</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row g-3">
     <div class="col-lg-6">
         <div class="card shadow-sm border-0 h-100">
@@ -129,6 +206,52 @@
                 else
                 {
                     <p class="text-muted mb-0">Yangi guruhlar yaratilmagan.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">📦 Arxivlangan foydalanuvchilar</h5>
+                <a asp-action="Arxivlanganlar" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-archive me-1"></i> Barchasini ko'rish
+                </a>
+            </div>
+            <div class="card-body">
+                @{
+                    var arxivlanganlar = ViewBag.Arxivlanganlar as List<talim_platforma.Models.Foydalanuvchi>;
+                    if (arxivlanganlar != null && arxivlanganlar.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var arxivlangan in arxivlanganlar.Take(5))
+                            {
+                                <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold">@arxivlangan.Familiya @arxivlangan.Ism</div>
+                                        <small class="text-muted">
+                                            @arxivlangan.Rol • 
+                                            @(arxivlangan.ArxivlanganSana?.ToString("dd.MM.yyyy") ?? "Noma'lum")
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-secondary">Arxivlangan</span>
+                                </div>
+                            }
+                        </div>
+                        @if (arxivlanganlar.Count > 5)
+                        {
+                            <div class="text-center mt-2">
+                                <small class="text-muted">va yana @(arxivlanganlar.Count - 5) ta...</small>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Hozircha arxivlangan foydalanuvchilar yo'q.</p>
+                    }
                 }
             </div>
         </div>

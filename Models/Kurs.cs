@@ -13,8 +13,11 @@ namespace talim_platforma.Models
         [Required(ErrorMessage = "Tavsif kiritilishi shart")]
         public string Tavsif { get; set; }
         public string Darajasi { get; set; }
-        [Range(0, 1000000, ErrorMessage = "Narx 0 dan katta bo‘lishi kerak")]
+        [Range(0, 1000000, ErrorMessage = "Narx 0 dan katta bo'lishi kerak")]
         public decimal Narxi { get; set; }
+        public int Davomiyligi { get; set; } // soatlar
+        public string Kategoriya { get; set; }
+        public bool Faol { get; set; } = true;
 
         public DateTime YaratilganVaqt { get; set; } = DateTime.Now;
         public DateTime YangilanganVaqt { get; set; } = DateTime.Now;

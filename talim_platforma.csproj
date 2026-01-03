@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseAppHost>false</UseAppHost>
+    <NoWarn>CS8618;CS8602;CS8620;CS8601</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +29,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Telegram.Bot" Version="22.0.0" />
+    <PackageReference Include="Telegram.Bot" Version="22.1.4" />
   </ItemGroup>
 
 </Project>

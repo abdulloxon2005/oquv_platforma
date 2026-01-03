@@ -22,7 +22,7 @@
 
             <div class="mb-4">
                 <label class="form-label fw-semibold">Talaba:</label>
-                <select name="talabaId" class="form-select" required>
+                <select name="talabaId" id="talabaSelect" class="form-select" required>
                     <option value="">-- Talabani tanlang --</option>
                     @foreach (var talaba in (SelectList)ViewBag.Talabalar)
                     {
@@ -33,14 +33,14 @@
 
             <div class="mb-4">
                 <label class="form-label fw-semibold">Kurslar (bir nechta tanlash mumkin):</label>
-                <select name="kurslar" multiple class="form-select" size="6" required>
+                <select name="kurslar" id="kursSelect" multiple class="form-select" size="6" required>
                     @foreach (var kurs in (MultiSelectList)ViewBag.Kurslar)
                     {
                         <option value="@kurs.Value">@kurs.Text</option>
                     }
                 </select>
                 <small class="text-muted d-block mt-1">
-                    Bir nechta kurs tanlash uchun <strong>Ctrl</strong> (yoki Mac’da <strong>Cmd</strong>) tugmasini bosib turing.
+                    Bir nechta kurs tanlash uchun Ctrl (yoki Mac’da Cmd) tugmasini bosib turing.
                 </small>
             </div>
 
@@ -58,3 +58,20 @@
 
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#talabaSelect').select2({
+                placeholder: "-- Talabani tanlang --",
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#kursSelect').select2({
+                placeholder: "Kurslarni tanlang",
+                width: '100%'
+            });
+        });
+    </script>
+}

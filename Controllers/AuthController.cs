@@ -33,8 +33,15 @@ namespace talim_platforma.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string login, string parol, string? deviceToken = null, string? platforma = "web")
         {
+            // Check if this is an AJAX request
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            
             if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(parol))
             {
+                if (isAjax)
+                {
+                    return Json(new { success = false, message = "❌ Login va parolni kiriting!" });
+                }
                 ViewBag.Xato = "❌ Login va parolni kiriting!";
                 return View();
             }
@@ -44,14 +51,41 @@ namespace talim_platforma.Controllers
 
             if (foydalanuvchi == null)
             {
-                ViewBag.Xato = "❌ Login yoki parol noto‘g‘ri.";
+                if (isAjax)
+                {
+                    return Json(new { success = false, message = "❌ Login yoki parol noto'g'ri." });
+                }
+                ViewBag.Xato = "❌ Login yoki parol noto'g'ri.";
                 return View();
+            }
+
+            // Arxivlangan foydalanuvchini tekshirish
+            if (foydalanuvchi.Arxivlanganmi && foydalanuvchi.ArxivlanganSana.HasValue)
+            {
+                var kunlarOtdi = (DateTime.Now - foydalanuvchi.ArxivlanganSana.Value).Days;
+                
+                // 1 oydan (30 kun) keyin kirishni bloklash
+                if (kunlarOtdi >= 30)
+                {
+                    if (isAjax)
+                    {
+                        return Json(new { success = false, message = "❌ Sizning hisobingiz arxivlangan va 1 oy o'tgan. Kirish imkoni yo'q." });
+                    }
+                    ViewBag.Xato = "❌ Sizning hisobingiz arxivlangan va 1 oy o'tgan. Kirish imkoni yo'q.";
+                    return View();
+                }
+                
+                // 1 oy ichida bo'lsa, faqat o'z ma'lumotlarini ko'ra oladi (keyinroq middleware yoki filter bilan ta'minlanadi)
             }
 
             var result = _passwordHasher.VerifyHashedPassword(foydalanuvchi, foydalanuvchi.Parol, parol);
             if (result == PasswordVerificationResult.Failed)
             {
-                ViewBag.Xato = "❌ Login yoki parol noto‘g‘ri.";
+                if (isAjax)
+                {
+                    return Json(new { success = false, message = "❌ Login yoki parol noto'g'ri." });
+                }
+                ViewBag.Xato = "❌ Login yoki parol noto'g'ri.";
                 return View();
             }
 
@@ -116,19 +150,20 @@ namespace talim_platforma.Controllers
 
             // Rollarga qarab yo'naltirish
             var rol = foydalanuvchi.Rol.Trim().ToLower();
-            switch (rol)
+            string redirectUrl = rol switch
             {
-                case "admin":
-                    return RedirectToAction("Foydalanuvchilar", "Admin");
-                case "oqituvchi":
-                case "teacher":
-                    return RedirectToAction("Index", "Oqituvchi");
-                case "oquvchi":
-                case "student":
-                    return RedirectToAction("DashboardTalaba", "Oquvchi");
-                default:
-                    return RedirectToAction("Index", "Home");
+                "admin" => "/Admin/Foydalanuvchilar",
+                "oqituvchi" or "teacher" => "/Oqituvchi/Index",
+                "oquvchi" or "student" => "/Oquvchi/DashboardTalaba",
+                _ => "/Home/Index"
+            };
+
+            if (isAjax)
+            {
+                return Json(new { success = true, redirect = redirectUrl });
             }
+
+            return RedirectToAction(redirectUrl.Split('/')[1], redirectUrl.Split('/')[0]);
         }
 
         // 🚪 Logout

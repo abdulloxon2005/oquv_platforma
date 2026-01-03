@@ -11,33 +11,37 @@
 <body class="bg-white text-gray-800 min-h-screen flex flex-col">
 
     <!-- Navbar -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
+    <header class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
 
-            <a href="/" class="text-xl md:text-2xl font-bold text-blue-600">
-                🎓 Ta'lim Platformasi
+            <a href="/" class="text-xl md:text-2xl font-bold text-blue-600 hover:scale-105 transition-transform hover:text-blue-700 flex items-center">
+                <img src="~/icons_talim/icons.png" alt="Ta'lim Plus" style="width:65px; height:65px; border-radius:50%; object-fit:cover;">
+
+                Ta'lim Plus Education Center
             </a>
 
-            <nav class="hidden md:flex space-x-6">
-                <a href="/" class="text-gray-700 hover:text-blue-600">Bosh sahifa</a>
-                <a href="/Courses" class="text-gray-700 hover:text-blue-600">Kurslar</a>
-                <a href="/Contact" class="text-gray-700 hover:text-blue-600">Bog‘lanish</a>
-                <a href="/Auth/Login" class="font-semibold text-gray-700 hover:text-blue-600">Kirish</a>
+            <nav class="hidden md:flex space-x-8">
+                <a href="/" class="text-gray-700 hover:text-blue-600 font-semibold transition-colors hover:scale-105 transform">Bosh sahifa</a>
+                <a href="#courses" class="text-gray-700 hover:text-blue-600 font-semibold transition-colors hover:scale-105 transform">Kurslar</a>
+                <a href="#footer" class="text-gray-700 hover:text-blue-600 font-semibold transition-colors hover:scale-105 transform">Bog'lanish</a>
+                <a href="javascript:void(0)" onclick="openLoginModal()" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:scale-105 transition-transform hover:bg-blue-700 hover:shadow-lg">
+                    Kirish
+                </a>
             </nav>
 
             <!-- Mobile Button -->
-            <button id="menuBtn" class="md:hidden text-3xl text-blue-600">
+            <button id="menuBtn" class="md:hidden text-3xl text-blue-600 hover:scale-110 transition-transform">
                 ☰
             </button>
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobileMenu" class="hidden bg-white shadow-md md:hidden">
-            <nav class="px-4 py-4 space-y-3">
-                <a href="/" class="block text-gray-700 hover:text-blue-600">Bosh sahifa</a>
-                <a href="/Courses" class="block text-gray-700 hover:text-blue-600">Kurslar</a>
-                <a href="/Contact" class="block text-gray-700 hover:text-blue-600">Bog‘lanish</a>
-                <a href="/Auth/Login" class="block font-semibold text-gray-700 hover:text-blue-600">Kirish</a>
+        <div id="mobileMenu" class="hidden bg-white md:hidden border-t border-gray-200">
+            <nav class="px-4 py-4 space-y-4">
+                <a href="/" class="block text-gray-700 hover:text-blue-600 font-semibold transition-colors hover:scale-105 transform">Bosh sahifa</a>
+                <a href="#courses" class="block text-gray-700 hover:text-blue-600 font-semibold transition-colors hover:scale-105 transform">Kurslar</a>
+                <a href="#footer" class="block text-gray-700 hover:text-blue-600 font-semibold transition-colors hover:scale-105 transform">Bog'lanish</a>
+                <a href="javascript:void(0)" onclick="openLoginModal()" class="block bg-blue-600 text-white px-6 py-2 rounded-full font-bold text-center hover:scale-105 transition-transform hover:bg-blue-700 hover:shadow-lg">Kirish</a>
             </nav>
         </div>
     </header>
@@ -48,17 +52,280 @@
         </main>
     </div>
 
-    <footer class="bg-blue-700 text-white py-8 mt-10">
-        <div class="text-center">
-            <p>&copy; 2025 Talim Plus. Barcha huquqlar himoyalangan.</p>
+    <footer id="footer" class="bg-gray-900 text-white py-12 mt-20 relative overflow-hidden">
+        <div class="relative z-10 max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                
+                <!-- Kompaniya haqida -->
+                <div class="text-center md:text-left">
+                    <h3 class="text-2xl font-black mb-4">🎓 Talim Plus</h3>
+                    <p class="text-gray-300 mb-4">
+                        Zamonaviy IT va til kurslari bilan kelajakingizni quring. Professional ustozlar va kafolatlangan natija.
+                    </p>
+                    <div class="flex justify-center md:justify-start space-x-4">
+                        <a href="https://t.me/talimplus" target="_blank" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.56l-1.68 7.88c-.12.57-.46.71-.93.44l-2.58-1.9-1.24 1.2c-.14.14-.26.26-.52.26l.18-2.62 4.78-4.32c.21-.18-.05-.28-.32-.1l-5.9 3.72-2.54-.8c-.55-.17-.56-.55.12-.81l9.92-3.82c.46-.17.86.11.71.8z"/>
+                            </svg>
+                        </a>
+                        <a href="https://instagram.com/talimplus" target="_blank" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 transition-colors">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
+                            </svg>
+                        </a>
+                        <a href="https://facebook.com/talimplus" target="_blank" class="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center hover:bg-blue-900 transition-colors">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tezkor havolalar -->
+                <div class="text-center md:text-left">
+                    <h4 class="text-lg font-bold mb-4">Tezkor havolalar</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/" class="text-gray-300 hover:text-white transition-colors">🏠 Bosh sahifa</a></li>
+                        <li><a href="/Courses" class="text-gray-300 hover:text-white transition-colors">📚 Kurslar</a></li>
+                        <li><a href="/About" class="text-gray-300 hover:text-white transition-colors">📖 Biz haqimizda</a></li>
+                        <li><a href="/Contact" class="text-gray-300 hover:text-white transition-colors">📞 Bog'lanish</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kontakt ma'lumotlari -->
+                <div class="text-center md:text-left">
+                    <h4 class="text-lg font-bold mb-4">Kontakt ma'lumotlari</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center justify-center md:justify-start">
+                            <span class="mr-2">📱</span>
+                            <a href="tel:+998901234567" class="text-gray-300 hover:text-white transition-colors">+998 90 123 45 67</a>
+                        </li>
+                        <li class="flex items-center justify-center md:justify-start">
+                            <span class="mr-2">📧</span>
+                            <a href="mailto:info@talimplus.uz" class="text-gray-300 hover:text-white transition-colors">info@talimplus.uz</a>
+                        </li>
+                        <li class="flex items-center justify-center md:justify-start">
+                            <span class="mr-2">💬</span>
+                            <a href="https://t.me/talimplus" target="_blank" class="text-gray-300 hover:text-white transition-colors">@@talimplus</a>
+                        </li>
+                        <li class="flex items-center justify-center md:justify-start">
+                            <span class="mr-2">📷</span>
+                            <a href="https://instagram.com/talimplus" target="_blank" class="text-gray-300 hover:text-white transition-colors">@@talimplus</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Manzil -->
+                <div class="text-center md:text-left">
+                    <h4 class="text-lg font-bold mb-4">Manzil</h4>
+                    <div class="space-y-2">
+                        <p class="text-gray-300 flex items-center justify-center md:justify-start">
+                            <span class="mr-2">📍</span>
+                            Toshkent shahri,<br>
+                            Shayxontohur tumani,<br>
+                            Beruniy ko'chasi, 105-uy
+                        </p>
+                        <div class="mt-4">
+                            <a href="https://maps.google.com/?q=Beruniy+105+Tashkent" target="_blank" 
+                               class="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                            Xaritada ko'rish
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright qismi -->
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400">
+                    &copy; <span id="currentYear"></span> Talim Plus Education Center. Barcha huquqlar himoyalangan.
+                </p>
+                <p class="text-gray-500 text-sm mt-2">
+                    Made with ❤️ in Tashkent
+                </p>
+            </div>
         </div>
     </footer>
 
     <script>
         document.getElementById("menuBtn").onclick = () =>
             document.getElementById("mobileMenu").classList.toggle("hidden");
+        
+        // Set current year dynamically
+        document.getElementById("currentYear").textContent = new Date().getFullYear();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Login Modal (agar bu sahifa Index bo'lmasa) -->
+    @if (ViewContext.ViewData["Title"]?.ToString() != "Talim Plus Education Center")
+    {
+        <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl w-[380px] p-8 relative shadow-2xl overflow-hidden">
+                <!-- Purple gradient top -->
+                <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-500 to-purple-400 rounded-t-3xl"></div>
+                
+                <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-white hover:text-gray-200 text-2xl z-10">
+                    ×
+                </button>
+                
+                <!-- Login title -->
+                <div class="relative z-10 text-center mb-8 mt-8">
+                    <h2 class="text-3xl font-bold text-white">Login</h2>
+                </div>
+
+                <form id="loginForm" class="relative z-10">
+                    @Html.AntiForgeryToken()
+                    
+                    <!-- Login field -->
+                    <div class="mb-6">
+                        <input type="text" name="login" id="login" 
+                               class="w-full border-b-2 border-gray-300 py-3 px-2 text-gray-700 focus:outline-none focus:border-purple-500 transition-colors bg-transparent" 
+                               placeholder="Login" required />
+                    </div>
+                    
+                    <!-- Password field -->
+                    <div class="mb-8">
+                        <input type="password" name="parol" id="parol" 
+                               class="w-full border-b-2 border-gray-300 py-3 px-2 text-gray-700 focus:outline-none focus:border-purple-500 transition-colors bg-transparent" 
+                               placeholder="Password" required autocomplete="current-password" />
+                    </div>
+                    
+                    <!-- Login button -->
+                    <button type="submit" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold py-3 rounded-full text-lg hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg">
+                        Login
+                    </button>
+                </form>
+            </div>
+
+                <!-- Error Modal -->
+                <div id="errorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-2xl p-8 max-w-sm mx-4">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 0 8 8 0 016 0zm1 1H9a1 1 0 00-1 1v4a1 1 0 002 2h1a1 1 0 002-2V9a1 1 0 00-1-1H9a1 1 0 00-1 1v4a1 1 0 002 2h1a1 1 0 002-2V9a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-red-600 mb-2">Xatolik yuz berdi!</h3>
+                            <p id="errorMessage" class="text-gray-600 mb-6">Login yoki parol noto'g'ri kiritilgan.</p>
+                            <button onclick="closeErrorModal()" 
+                                    class="w-full bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition-all">
+                                Qayta urinib ko'rish
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    }
+
+    <script>
+        // Login modal functions
+        function openLoginModal() {
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                // Login formani tozalash
+                const form = document.getElementById('loginForm');
+                if (form) form.reset();
+            }
+        }
+
+        function showErrorModal() {
+            const modal = document.getElementById('errorModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function showErrorModalWithMessage(message) {
+            const modal = document.getElementById('errorModal');
+            const messageEl = document.getElementById('errorMessage');
+            if (modal && messageEl) {
+                messageEl.textContent = message;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeErrorModal() {
+            const modal = document.getElementById('errorModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // Login form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const login = document.getElementById('login').value;
+                    const parol = document.getElementById('parol').value;
+                    
+                    if (!login || !parol) {
+                        showErrorModal();
+                        return;
+                    }
+                    
+                    fetch('/Auth/Login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: new URLSearchParams(new FormData(this))
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('login').value = '';
+                            document.getElementById('parol').value = '';
+                            window.location.href = data.redirect || '/Admin/Index';
+                        } else {
+                            showErrorModalWithMessage(data.message || "Login yoki parol noto'g'ri kiritilgan.");
+                        }
+                    })
+                    .catch(error => {
+                        this.submit();
+                    });
+                });
+            }
+
+            // Modal tashqarisiga bosilganda yopish
+            const loginModal = document.getElementById('loginModal');
+            const errorModal = document.getElementById('errorModal');
+            
+            if (loginModal) {
+                loginModal.addEventListener('click', function(e) {
+                    if (e.target === this) closeLoginModal();
+                });
+            }
+            
+            if (errorModal) {
+                errorModal.addEventListener('click', function(e) {
+                    if (e.target === this) closeErrorModal();
+                });
+            }
+
+            // ESC tugmasi bilan yopish
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeLoginModal();
+                    closeErrorModal();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

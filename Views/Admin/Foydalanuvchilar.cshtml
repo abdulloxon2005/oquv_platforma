@@ -58,11 +58,17 @@
                         "student" or "talaba" or "oquvchi" => "badge-role badge-role-student",
                         _ => "badge-role badge-role-user"
                     };
-                    <tr>
+                    var isArxivlangan = item.Arxivlanganmi;
+                    var rowClass = isArxivlangan ? "table-secondary opacity-75" : "";
+                    <tr class="@rowClass">
                         <td>@index</td>
                         <td>
                             <div class="fw-semibold">@fullName</div>
                             <div class="text-muted small">@item.OtasiningIsmi</div>
+                            @if (isArxivlangan)
+                            {
+                                <span class="badge bg-secondary small">📦 Arxivlangan</span>
+                            }
                         </td>
                         <td class="text-nowrap">@item.TelefonRaqam</td>
                         <td>@item.Login</td>
@@ -72,9 +78,17 @@
                             </span>
                         </td>
                         <td class="text-end text-nowrap">
+                            @if (!isArxivlangan)
+                            {
                             <a asp-action="FoydalanuvchiTahrirlash" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary me-1">
                                 <i class="fas fa-pen"></i>
                             </a>
+                                <form asp-action="FoydalanuvchiArxivlash" asp-route-id="@item.Id" method="post" style="display: inline;" onsubmit="return confirm('Haqiqatan ham arxivlamoqchimisiz?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-warning me-1" title="Arxivlash">
+                                        <i class="fas fa-archive"></i>
+                                    </button>
+                                </form>
                             <a asp-action="FoydalanuvchiOchirish" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger me-1"
                                onclick="return confirm('Haqiqatan ham o‘chirmoqchimisiz?');">
                                 <i class="fas fa-trash"></i>
@@ -82,6 +96,11 @@
                             <a asp-controller="Admin" asp-action="BotUlash" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">
                                 <i class="fas fa-robot"></i>
                             </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Amallar mavjud emas</span>
+                            }
                         </td>
                     </tr>
                     index++;

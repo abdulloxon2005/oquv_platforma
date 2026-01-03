@@ -47,5 +47,13 @@ namespace talim_platforma.Models
         public ICollection<Guruh>? Guruhlar { get; set; }
         //public string? DeviceToken { get; set; }
         public bool Faolmi { get; set; } = true;
+        
+        // Arxivlash uchun maydonlar
+        public DateTime? ArxivlanganSana { get; set; }
+        public bool Arxivlanganmi => ArxivlanganSana.HasValue;
+        
+        // Tangacha (o'quvchi uchun to'plangan tangacha miqdori)
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Tangacha { get; set; } = 0;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,11 +20,35 @@ namespace talim_platforma.Controllers
 
         private readonly ApplicationDbContext _context;
         private readonly IStudentStatusService _studentStatusService;
+        private int? _currentUserId;
 
         public DavomatController(ApplicationDbContext context, IStudentStatusService studentStatusService)
         {
             _context = context;
             _studentStatusService = studentStatusService;
+        }
+
+        private int? GetCurrentUserId()
+        {
+            if (!_currentUserId.HasValue)
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+                {
+                    _currentUserId = userId;
+                }
+            }
+            return _currentUserId;
+        }
+
+        private string GetCurrentRole()
+        {
+            return User.FindFirst(ClaimTypes.Role)?.Value ?? "";
+        }
+
+        private bool IsAdminRole()
+        {
+            return GetCurrentRole() == "admin";
         }
 
         public IActionResult Index(int? guruhId)
@@ -35,13 +60,34 @@ namespace talim_platforma.Controllers
                 .OrderByDescending(d => d.Sana)
                 .AsQueryable();
 
+            // Faqat o'z guruhlarini ko'rish (teacher uchun)
+            if (!IsAdminRole())
+            {
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId.HasValue)
+                {
+                    query = query.Where(d => d.OqituvchiId == currentUserId.Value);
+                }
+            }
+
             if (guruhId.HasValue)
             {
                 query = query.Where(d => d.GuruhId == guruhId.Value);
             }
 
             var records = query.Take(200).ToList();
-            ViewBag.Guruhlar = new SelectList(_context.Guruhlar.ToList(), "Id", "Nomi", guruhId);
+            
+            // Guruhlar ro'yxatini ham filterlash
+            var guruhQuery = _context.Guruhlar.AsQueryable();
+            if (!IsAdminRole())
+            {
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId.HasValue)
+                {
+                    guruhQuery = guruhQuery.Where(g => g.OqituvchiId == currentUserId.Value);
+                }
+            }
+            ViewBag.Guruhlar = new SelectList(guruhQuery.ToList(), "Id", "Nomi", guruhId);
 
             return View(records);
         }
@@ -74,6 +120,16 @@ namespace talim_platforma.Controllers
                 ModelState.AddModelError(nameof(model.GuruhId), "Guruh topilmadi.");
             }
 
+            // Guruhga ruxsat borligini tekshirish
+            if (!IsAdminRole())
+            {
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue || guruh?.OqituvchiId != currentUserId.Value)
+                {
+                    ModelState.AddModelError("", "Bu guruhga davomat qo'shish huquqingiz yo'q.");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 PopulateSelectLists(model.GuruhId, model.TalabaId);
@@ -104,10 +160,23 @@ namespace talim_platforma.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var entity = _context.Davomatlar.FirstOrDefault(d => d.Id == id);
+            var entity = _context.Davomatlar
+                .Include(d => d.Guruh)
+                .FirstOrDefault(d => d.Id == id);
+            
             if (entity == null)
             {
                 return NotFound();
+            }
+
+            // Ruxsatni tekshirish
+            if (!IsAdminRole())
+            {
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue || entity.OqituvchiId != currentUserId.Value)
+                {
+                    return Forbid();
+                }
             }
 
             var model = new DavomatCreateViewModel
@@ -145,10 +214,23 @@ namespace talim_platforma.Controllers
                 return View("Upsert", model);
             }
 
-            var entity = await _context.Davomatlar.FirstOrDefaultAsync(d => d.Id == id);
+            var entity = await _context.Davomatlar
+                .Include(d => d.Guruh)
+                .FirstOrDefaultAsync(d => d.Id == id);
+            
             if (entity == null)
             {
                 return NotFound();
+            }
+
+            // Ruxsatni tekshirish
+            if (!IsAdminRole())
+            {
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue || entity.OqituvchiId != currentUserId.Value)
+                {
+                    return Forbid();
+                }
             }
 
             entity.GuruhId = model.GuruhId;
@@ -170,10 +252,23 @@ namespace talim_platforma.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var entity = await _context.Davomatlar.FirstOrDefaultAsync(d => d.Id == id);
+            var entity = await _context.Davomatlar
+                .Include(d => d.Guruh)
+                .FirstOrDefaultAsync(d => d.Id == id);
+            
             if (entity == null)
             {
                 return NotFound();
+            }
+
+            // Ruxsatni tekshirish
+            if (!IsAdminRole())
+            {
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue || entity.OqituvchiId != currentUserId.Value)
+                {
+                    return Forbid();
+                }
             }
 
             _context.Davomatlar.Remove(entity);
@@ -193,10 +288,23 @@ namespace talim_platforma.Controllers
                 return BadRequest(new { message = "Noto'g'ri ma'lumot." });
             }
 
-            var davomat = await _context.Davomatlar.FirstOrDefaultAsync(d => d.Id == request.DavomatId);
+            var davomat = await _context.Davomatlar
+                .Include(d => d.Guruh)
+                .FirstOrDefaultAsync(d => d.Id == request.DavomatId);
+            
             if (davomat == null)
             {
                 return NotFound();
+            }
+
+            // Ruxsatni tekshirish
+            if (!IsAdminRole())
+            {
+                var currentUserId = GetCurrentUserId();
+                if (!currentUserId.HasValue || davomat.OqituvchiId != currentUserId.Value)
+                {
+                    return Forbid();
+                }
             }
 
             if (await _context.DavomatSabablar.AnyAsync(ds => ds.DavomatId == davomat.Id))
@@ -222,7 +330,17 @@ namespace talim_platforma.Controllers
 
         private void PopulateSelectLists(int? guruhId, int? talabaId)
         {
-            ViewBag.Guruhlar = new SelectList(_context.Guruhlar.ToList(), "Id", "Nomi", guruhId);
+            // Guruhlar ro'yxatini filterlash
+            var guruhQuery = _context.Guruhlar.AsQueryable();
+            if (!IsAdminRole())
+            {
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId.HasValue)
+                {
+                    guruhQuery = guruhQuery.Where(g => g.OqituvchiId == currentUserId.Value);
+                }
+            }
+            ViewBag.Guruhlar = new SelectList(guruhQuery.ToList(), "Id", "Nomi", guruhId);
 
             var talabaQuery = _context.Foydalanuvchilar
                 .Where(f => f.Rol == "Talaba" || f.Rol.ToLower() == "student");
